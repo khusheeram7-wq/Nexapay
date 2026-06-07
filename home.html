@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexaPay - Home</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Segoe UI', Roboto, sans-serif; background-color: #F8F9FA; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        /* Banner Animation */
+        .slide { position: absolute; inset: 0; transition: opacity 0.7s ease-in-out; }
+        .slide.active { opacity: 1; z-index: 10; }
+        .slide.hidden-slide { opacity: 0; z-index: 0; }
+    </style>
+</head>
+<body class="flex justify-center items-center min-h-screen">
+
+    <div id="globalNoticeOverlay" class="fixed inset-0 bg-slate-900/60 z-[9000] flex justify-center items-center px-4 hidden">
+        <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl text-center space-y-4 border border-gray-100">
+            <h3 class="text-lg font-black text-gray-900"><i class="fa-solid fa-bullhorn text-blue-500 mr-2"></i> Announcement</h3>
+            <p id="globalNoticeText" class="text-sm text-gray-600 leading-relaxed"></p>
+            <button onclick="document.getElementById('globalNoticeOverlay').classList.add('hidden')" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl mt-2 shadow-md">Close</button>
+        </div>
+    </div>
+
+    <div id="maintenanceOverlayBlock" class="fixed inset-0 bg-slate-900 z-[9999] flex justify-center items-center px-4 hidden">
+        <div class="bg-white w-full max-w-sm rounded-3xl p-8 shadow-2xl text-center space-y-4 border border-gray-100">
+            <div class="w-16 h-16 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center text-2xl mx-auto animate-bounce">
+                <i class="fa-solid fa-hammer"></i>
+            </div>
+            <h2 class="text-xl font-black text-gray-900">App is Under Maintenance</h2>
+            <p class="text-xs text-gray-500 leading-relaxed">Our team is currently working on an update. Please check back shortly. Thank you!</p>
+        </div>
+    </div>
+
+    <div id="bannerTextModal" class="fixed inset-0 bg-black/60 z-[9999] flex justify-center items-center px-4 hidden">
+        <div class="bg-white w-full max-w-[320px] rounded-[24px] p-6 text-center shadow-2xl scale-100 transition-transform">
+            <h2 class="text-[17px] font-bold text-gray-900 mb-2">Notice to Users</h2>
+            <p id="bannerTextContent" class="text-[13px] text-gray-600 mb-6 leading-relaxed"></p>
+            <button onclick="document.getElementById('bannerTextModal').classList.add('hidden')" class="w-full bg-black text-white font-bold py-3.5 rounded-xl transition hover:bg-gray-800">Confirm</button>
+        </div>
+    </div>
+
+    <div id="bannerImageModal" class="fixed inset-0 bg-black/80 z-[9999] flex flex-col justify-center items-center px-4 hidden">
+        <div class="w-full max-w-sm flex justify-end mb-3">
+            <button onclick="document.getElementById('bannerImageModal').classList.add('hidden')" class="text-white text-3xl hover:text-red-500"><i class="fa-regular fa-circle-xmark"></i></button>
+        </div>
+        <img id="bannerImageContent" src="" class="w-full max-w-sm rounded-xl object-contain">
+    </div>
+
+    <div id="videoModal" class="fixed inset-0 bg-black/95 z-[9999] flex flex-col justify-center items-center hidden">
+        <div class="w-full max-w-md px-4 flex justify-between items-center mb-4 text-white absolute top-6">
+            <span class="font-bold text-lg">Tutorial Video</span>
+            <button onclick="closeVideoModal()" class="text-3xl hover:text-red-500"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="w-full max-w-md px-2 h-64 md:h-80" id="videoContainer">
+        </div>
+    </div>
+
+    <div class="bg-white w-full max-w-md min-h-screen md:min-h-[850px] flex flex-col justify-between shadow-xl md:rounded-3xl overflow-hidden relative">
+        
+        <div class="flex-1 overflow-y-auto pb-24 hide-scrollbar">
+            
+            <div class="px-5 pt-6 pb-4 bg-white sticky top-0 z-50 flex justify-between items-center">
+                <h1 class="text-[22px] font-black text-gray-900 tracking-tight">NexaPay</h1>
+            </div>
+
+            <div class="px-4 mt-2 relative group">
+                <div id="sliderContainer" class="w-full h-44 rounded-[20px] overflow-hidden relative shadow-md bg-gray-900">
+                    <div class="slide active">
+                        <div class="w-full h-full animate-pulse flex items-center justify-center text-gray-400 text-xs">Loading Banners...</div>
+                    </div>
+                </div>
+                <div id="sliderDots" class="flex justify-center space-x-1.5 mt-3"></div>
+            </div>
+
+            <div class="px-4 mt-4">
+                <div class="bg-gray-50 rounded-[20px] p-5 flex justify-between items-center">
+                    <div class="border-r border-gray-200 pr-4 flex-1 text-left">
+                        <p class="text-xs font-bold text-gray-900">USDT Ratio</p>
+                        <h2 class="text-[17px] font-black text-gray-900 mt-2">1 USDT ≈ <span id="usdtRateDisplay">0</span> INR</h2>
+                        <p class="text-[10px] text-gray-400 mt-1 font-medium">Bonus ratio: <span id="usdtBonusRatioDisplay">2</span>%</p>
+                    </div>
+                    <div class="pl-6 w-1/3 text-left">
+                        <p class="text-xs font-bold text-gray-900">INR Bonus Ratio</p>
+                        <h2 id="inrBonusDisplay" class="text-[22px] font-black text-gray-900 mt-1">0%</h2>
+                    </div>
+                </div>
+            </div>
+
+            <div class="px-4 mt-4">
+                <button onclick="window.location.href='deposit.html'" class="w-full bg-black text-white font-bold py-4 rounded-[20px] shadow-md relative overflow-hidden transition-transform duration-200 active:scale-95 flex justify-center items-center text-lg">
+                    Top up
+                    <span class="absolute right-0 top-0 bg-gradient-to-r from-blue-400 to-indigo-500 text-[10px] text-white font-black px-4 py-1.5 rounded-bl-[16px] flex items-center gap-1">
+                        <i class="fa-solid fa-coins text-[#FBBF24]"></i> First
+                    </span>
+                </button>
+            </div>
+
+            <div class="px-4 mt-6">
+                <div class="grid grid-cols-2 gap-y-6 gap-x-4 px-2">
+                    
+                    <div onclick="window.location.href='me.html?focus=quota'" class="cursor-pointer text-left group">
+                        <div class="flex justify-between items-center text-gray-400 mb-1">
+                            <span class="text-[13px] font-medium text-gray-500 group-hover:text-gray-800 transition">Balance</span>
+                            <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                        </div>
+                        <h3 class="text-[17px] font-black text-gray-900" id="lblHomeBalancePool">0.00</h3>
+                    </div>
+
+                    <div onclick="window.location.href='token_history.html'" class="cursor-pointer text-left group">
+                        <div class="flex justify-between items-center text-gray-400 mb-1">
+                            <span class="text-[13px] font-medium text-gray-500 group-hover:text-gray-800 transition">Today Received</span>
+                            <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                        </div>
+                        <h3 class="text-[17px] font-black text-gray-900" id="lblHomeTodayReceived">0.00</h3>
+                    </div>
+
+                    <div onclick="window.location.href='recharge_history.html?type=usdt'" class="cursor-pointer text-left group">
+                        <div class="flex justify-between items-center text-gray-400 mb-1">
+                            <span class="text-[13px] font-medium text-gray-500 group-hover:text-gray-800 transition">Top up Bonus</span>
+                            <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                        </div>
+                        <h3 class="text-[17px] font-black text-gray-900" id="lblHomeTopupBonus">0.00</h3>
+                    </div>
+
+                    <div onclick="window.location.href='team.html'" class="cursor-pointer text-left group">
+                        <div class="flex justify-between items-center text-gray-400 mb-1">
+                            <span class="text-[13px] font-medium text-gray-500 group-hover:text-gray-800 transition">Team Commission</span>
+                            <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                        </div>
+                        <h3 class="text-[17px] font-black text-gray-900" id="lblHomeTeamCommission">0.00</h3>
+                    </div>
+                </div>
+            </div>
+
+            <div class="px-4 mt-8">
+                <h3 class="text-[19px] font-black text-gray-900 mb-4 px-1">Tutorial</h3>
+                <div id="tutorialList" class="space-y-4">
+                    <div class="text-xs text-gray-400 text-center py-4">Loading guides...</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="absolute bottom-0 inset-x-0 bg-white border-t border-gray-100 px-2 py-2.5 flex justify-between items-center shadow-[0_-4px_20px_rgba(0,0,0,0.03)] z-50">
+            <button onclick="window.location.href='home.html'" class="footer-tab flex-1 flex flex-col items-center gap-1 text-[#1E56B2] font-bold transition-all cursor-pointer">
+                <i class="fa-solid fa-house text-lg"></i>
+                <span class="text-[10px] tracking-wide">Home</span>
+            </button>
+            <button onclick="window.location.href='deposit.html'" class="footer-tab flex-1 flex flex-col items-center gap-1 text-gray-400 hover:text-[#1E56B2] font-medium transition-all cursor-pointer">
+                <i class="fa-solid fa-right-left text-lg"></i>
+                <span class="text-[10px] tracking-wide">Deposit</span>
+            </button>
+            <button onclick="window.location.href='upi.html'" class="footer-tab flex-1 flex flex-col items-center gap-1 text-gray-400 hover:text-[#1E56B2] font-medium transition-all cursor-pointer">
+                <i class="fa-solid fa-briefcase text-lg"></i>
+                <span class="text-[10px] tracking-wide">UPI</span>
+            </button>
+            <button onclick="window.location.href='team.html'" class="footer-tab flex-1 flex flex-col items-center gap-1 text-gray-400 hover:text-[#1E56B2] font-medium transition-all cursor-pointer">
+                <i class="fa-solid fa-chart-pie text-lg"></i>
+                <span class="text-[10px] tracking-wide">Team</span>
+            </button>
+            <button onclick="window.location.href='me.html'" class="footer-tab flex-1 flex flex-col items-center gap-1 text-gray-400 hover:text-[#1E56B2] font-medium transition-all cursor-pointer">
+                <i class="fa-solid fa-user-astronaut text-lg"></i>
+                <span class="text-[10px] tracking-wide">Me</span>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Modal Handlers
+        window.openBannerTextModal = function(text) {
+            document.getElementById('bannerTextContent').innerText = text;
+            document.getElementById('bannerTextModal').classList.remove('hidden');
+        }
+
+        window.openBannerImageModal = function(imageSrc) {
+            document.getElementById('bannerImageContent').src = imageSrc;
+            document.getElementById('bannerImageModal').classList.remove('hidden');
+        }
+
+        window.openVideoModal = function(link) {
+            const container = document.getElementById('videoContainer');
+            if (link.includes('youtube.com') || link.includes('youtu.be')) {
+                const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+                const match = link.match(regExp);
+                const ytId = (match && match[2].length === 11) ? match[2] : null;
+                
+                if(ytId) {
+                    container.innerHTML = `<iframe class="w-full h-full rounded-xl" src="https://www.youtube.com/embed/${ytId}?autoplay=1" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+                } else {
+                    window.open(link, '_blank');
+                }
+            } else {
+                container.innerHTML = `<video class="w-full h-full rounded-xl object-cover bg-black" controls autoplay><source src="${link}">Your browser does not support the video tag.</video>`;
+            }
+            document.getElementById('videoModal').classList.remove('hidden');
+        };
+
+        window.closeVideoModal = function() {
+            document.getElementById('videoContainer').innerHTML = '';
+            document.getElementById('videoModal').classList.add('hidden');
+        };
+
+        // Slider Animation Logic
+        let currentSlideIdx = 0;
+        let sliderInterval;
+        window.startAutoSlider = function(totalSlides) {
+            clearInterval(sliderInterval);
+            if(totalSlides <= 1) return;
+            
+            sliderInterval = setInterval(() => {
+                const slides = document.querySelectorAll('.slide');
+                const dots = document.querySelectorAll('#sliderDots div');
+                
+                if(!slides[currentSlideIdx]) return;
+                slides[currentSlideIdx].classList.replace('active', 'hidden-slide');
+                if(dots[currentSlideIdx]){ dots[currentSlideIdx].classList.replace('bg-black', 'bg-gray-300'); dots[currentSlideIdx].classList.replace('w-3', 'w-1.5'); }
+
+                currentSlideIdx = (currentSlideIdx + 1) % totalSlides;
+
+                slides[currentSlideIdx].classList.replace('hidden-slide', 'active');
+                if(dots[currentSlideIdx]){ dots[currentSlideIdx].classList.replace('bg-gray-300', 'bg-black'); dots[currentSlideIdx].classList.replace('w-1.5', 'w-3'); }
+            }, 3000);
+        }
+    </script>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, doc, collection, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // REAL FIREBASE KEYS
+        const firebaseConfig = {
+            apiKey: "AIzaSyCHoR7wojkpTZZPR-gcfDnPW8aOTuoiaAU",
+            authDomain: "nexapay-342d0.firebaseapp.com",
+            databaseURL: "https://nexapay-342d0-default-rtdb.firebaseio.com",
+            projectId: "nexapay-342d0",
+            storageBucket: "nexapay-342d0.firebasestorage.app",
+            messagingSenderId: "305096071099",
+            appId: "1:305096071099:web:3db1e75a2669adbcae569e",
+            measurementId: "G-9S068TQ2CS"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // --- 1. Master Settings Sync ---
+        function syncMasterSettings() {
+            const masterRef = doc(db, "system_settings", "master_config");
+            
+            onSnapshot(masterRef, (snapshot) => {
+                if (snapshot.exists()) {
+                    const data = snapshot.data();
+                    
+                    if (data.isSystemFrozen === true) {
+                        document.getElementById('maintenanceOverlayBlock').classList.remove('hidden');
+                        return; 
+                    } else {
+                        document.getElementById('maintenanceOverlayBlock').classList.add('hidden');
+                    }
+
+                    if(data.usdtRate) document.getElementById('usdtRateDisplay').innerText = data.usdtRate;
+                    if(data.depBonusNew) document.getElementById('inrBonusDisplay').innerText = data.depBonusNew + '%';
+                    if(data.depBonusUsdt) document.getElementById('usdtBonusRatioDisplay').innerText = data.depBonusUsdt;
+
+                    // Team Commission section configuration value update from admin settings
+                    if(data.defaultTeamCommission) {
+                        document.getElementById('lblHomeTeamCommission').innerText = Number(data.defaultTeamCommission).toFixed(2);
+                    }
+
+                    if(data.commNotice && data.commNotice.trim() !== '') {
+                        const lastNotice = sessionStorage.getItem('lastNoticeSeen');
+                        if(lastNotice !== data.commNotice) {
+                            document.getElementById('globalNoticeText').innerText = data.commNotice;
+                            document.getElementById('globalNoticeOverlay').classList.remove('hidden');
+                            sessionStorage.setItem('lastNoticeSeen', data.commNotice);
+                        }
+                    }
+                }
+            });
+
+            // Sync Active Banners
+            const bannerRef = doc(db, "system_settings", "banners");
+            onSnapshot(bannerRef, (snapshot) => {
+                const sliderContainer = document.getElementById('sliderContainer');
+                const sliderDots = document.getElementById('sliderDots');
+                
+                if (snapshot.exists() && snapshot.data().list && snapshot.data().list.length > 0) {
+                    const banners = snapshot.data().list;
+                    sliderContainer.innerHTML = '';
+                    sliderDots.innerHTML = '';
+
+                    banners.forEach((b, index) => {
+                        let clickLogic = '';
+                        if (b.actionType === 'notice') {
+                            clickLogic = `onclick="openBannerTextModal(\`${b.actionContent}\`)"`;
+                        } else if (b.actionType === 'image' && b.actionContent && b.actionContent.startsWith('data:image')) {
+                            clickLogic = `onclick="openBannerImageModal(\`${b.actionContent}\`)"`;
+                        } else if (b.link) {
+                            clickLogic = `onclick="window.location.href='${b.link}'"`;
+                        }
+                        
+                        sliderContainer.innerHTML += `
+                            <div class="slide ${index === 0 ? 'active' : 'hidden-slide'} w-full h-full cursor-pointer" ${clickLogic}>
+                                <img src="${b.image}" class="w-full h-full object-cover brightness-95">
+                            </div>
+                        `;
+                        sliderDots.innerHTML += `<div class="w-1.5 h-1.5 rounded-full transition-all duration-300 ${index === 0 ? 'bg-black w-3' : 'bg-gray-300'}"></div>`;
+                    });
+
+                    window.startAutoSlider(banners.length);
+                }
+            });
+
+            // Sync Home Page Videos
+            const videoRef = doc(db, "system_settings", "videos");
+            onSnapshot(videoRef, (snapshot) => {
+                const tutorialList = document.getElementById('tutorialList');
+                if (snapshot.exists() && snapshot.data().homeVideos && snapshot.data().homeVideos.length > 0) {
+                    const vids = snapshot.data().homeVideos;
+                    tutorialList.innerHTML = '';
+
+                    vids.forEach((v, index) => {
+                        let thumbHtml = v.thumbnail 
+                            ? `<img src="${v.thumbnail}" class="w-[72px] h-[72px] rounded-xl object-cover shadow-sm">`
+                            : `<div class="w-[72px] h-[72px] bg-gray-200 rounded-xl shadow-sm flex items-center justify-center text-white text-2xl font-black relative overflow-hidden"><i class="fa-solid fa-play opacity-70"></i></div>`;
+
+                        tutorialList.innerHTML += `
+                            <div class="flex justify-between items-center group cursor-pointer" onclick="openVideoModal('${v.link}')">
+                                <div class="flex-1 pr-4">
+                                    <h4 class="font-bold text-gray-900 text-sm group-hover:text-blue-600 transition">${v.title}</h4>
+                                    <p class="text-[11px] text-gray-500 mt-1 flex items-center gap-1 font-semibold">Watch video <i class="fa-solid fa-chevron-right text-[9px]"></i></p>
+                                </div>
+                                ${thumbHtml}
+                            </div>
+                            <hr class="border-gray-100 last:hidden my-4">
+                        `;
+                    });
+                } else {
+                    tutorialList.innerHTML = `<div class="text-xs text-gray-400 py-4">No tutorials available right now.</div>`;
+                }
+            });
+        }
+
+        // --- 2. Live User Balance & Payout/Commission Tracking Sync ---
+        function syncUserBalance() {
+            const userId = localStorage.getItem('sessionUserIdentityId') || localStorage.getItem('nexaUserId') || 'UID_UNKNOWN'; 
+            const userRef = doc(db, "users", userId);
+            
+            onSnapshot(userRef, async (docSnap) => {
+                if(docSnap.exists()) {
+                    const data = docSnap.data();
+                    
+                    // Display Live Balance
+                    document.getElementById('lblHomeBalancePool').innerText = Number(data.balance || 0).toFixed(2);
+                    
+                    // Display Top Up Bonus Value
+                    document.getElementById('lblHomeTopupBonus').innerText = Number(data.topupBonus || 0).toFixed(2);
+
+                    // --- Raat ke 12 baje Auto-Reset & 24hr Approved Withdrawal Calculator System ---
+                    const todayDateString = new Date().toISOString().split('T')[0]; // Format: YYYY-MM-DD
+                    
+                    // Checking if date shifted to next day for local reset tracking
+                    if (data.lastReceivedResetDate !== todayDateString) {
+                        await updateDoc(userRef, {
+                            todayReceivedAmount: 0,
+                            lastReceivedResetDate: todayDateString
+                        });
+                        document.getElementById('lblHomeTodayReceived').innerText = "0.00";
+                    } else {
+                        // Agar date matched hai toh admin payout HTML approved logic dynamically is sync me bypass mapping karega
+                        // Admin panel payouts system variables logic mapping updates
+                        const confirmedPayout = data.todayReceivedAmount || data.approvedPayoutsToday || 0;
+                        document.getElementById('lblHomeTodayReceived').innerText = Number(confirmedPayout).toFixed(2);
+                    }
+
+                    // Individual Custom Commission if overriding master settings
+                    if(data.customTeamCommission !== undefined) {
+                        document.getElementById('lblHomeTeamCommission').innerText = Number(data.customTeamCommission).toFixed(2);
+                    }
+                }
+            });
+        }
+
+        // Initiate Listeners on Load
+        window.addEventListener('DOMContentLoaded', () => {
+            syncMasterSettings();
+            syncUserBalance();
+        });
+    </script>
+</body>
+</html>

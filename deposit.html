@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexaPay - Deposit</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link class="ui-theme-track" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Segoe UI', Roboto, sans-serif; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type=number] { -moz-appearance: textfield; }
+        .loader-spin { border: 3px solid #f3f3f3; border-top: 3px solid #1E56B2; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="bg-[#F8F9FA] flex justify-center items-center min-h-screen">
+
+    <div id="fastPaymentProgressLoader" class="fixed inset-0 bg-black/60 z-[10000] flex flex-col justify-center items-center hidden select-none">
+        <div class="bg-white p-6 rounded-2xl flex flex-col items-center space-y-4 shadow-2xl max-w-xs text-center">
+            <div class="loader-spin"></div>
+            <p class="text-xs font-black text-gray-800">Initiating Fast Payment Secure Gateway Connection... Please wait.</p>
+        </div>
+    </div>
+
+    <div class="bg-white w-full max-w-md min-h-screen md:min-h-[850px] flex flex-col justify-between shadow-xl md:rounded-3xl overflow-hidden relative border border-gray-100">
+        
+        <div class="flex-1 overflow-y-auto pb-24 hide-scrollbar">
+            
+            <div class="px-5 pt-6 bg-white sticky top-0 z-40 border-b border-gray-100 pb-2">
+                <div class="flex space-x-6 text-base font-black text-gray-400">
+                    <button onclick="switchCategoryGateTab('inr')" id="tabBtn-inr" class="text-gray-900 border-b-2 border-black pb-2 font-black cursor-pointer">INR</button>
+                    <button onclick="switchCategoryGateTab('usdt')" id="tabBtn-usdt" class="pb-2 border-b-2 border-transparent font-bold text-gray-400 cursor-pointer">USDT</button>
+                </div>
+            </div>
+
+            <div id="section-inr" class="px-4 mt-4 space-y-4">
+                <div class="flex space-x-6 text-sm font-bold text-gray-400 border-b border-gray-400 pb-2">
+                    <button onclick="switchInrSubCategoryTab('Task')" id="subTabBtn-Task" class="text-gray-900 border-b-2 border-black pb-1 font-black cursor-pointer">Task</button>
+                    <button onclick="switchInrSubCategoryTab('VIP')" id="subTabBtn-VIP" class="pb-1 border-b-2 border-transparent cursor-pointer">VIP</button>
+                </div>
+
+                <div class="bg-[#EEF2FF] rounded-xl p-3 flex items-center space-x-2.5 border border-indigo-50">
+                    <span class="text-amber-500 text-xs"><i class="fa-solid fa-circle-dollar-to-slot"></i></span>
+                    <p class="text-[11px] font-bold text-gray-700">Complete a task to earn Commission and Bonus</p>
+                </div>
+
+                <div class="flex items-center justify-between gap-2 mt-2">
+                    <div onclick="toggleSortDirectionCriteriaValue()" class="relative bg-gray-100 px-3 py-2 rounded-lg text-xs font-bold text-gray-600 flex items-center gap-1 cursor-pointer select-none">
+                        <span id="lblCurrentSortDirectionText">From low to high</span> 
+                        <i class="fa-solid fa-arrow-up-9-1 text-[10px] text-gray-400"></i>
+                    </div>
+                    <div class="flex space-x-1">
+                        <input id="txtFilterMinRange" type="number" oninput="triggerTaskFilterProcessing()" placeholder="Min" class="w-14 bg-gray-100 text-center py-2 rounded-lg text-xs font-bold outline-none placeholder-gray-400">
+                        <span class="text-gray-300 text-xs self-center">-</span>
+                        <input id="txtFilterMaxRange" type="number" oninput="triggerTaskFilterProcessing()" placeholder="Max" class="w-14 bg-gray-100 text-center py-2 rounded-lg text-xs font-bold outline-none placeholder-gray-400">
+                    </div>
+                    <button onclick="resetAndRefreshTaskGridConsole()" class="bg-black text-white text-xs font-bold px-3 py-2 rounded-lg hover:bg-gray-900 transition-colors cursor-pointer">Refresh</button>
+                </div>
+
+                <div id="inrTasksContainer" class="space-y-1.5 pt-2"></div>
+            </div>
+
+            <div id="section-usdt" class="px-4 mt-5 space-y-5 hidden">
+                <div class="bg-white rounded-2xl p-5 flex flex-col items-center text-center border border-gray-50 shadow-2xl">
+                    <div class="w-44 h-44 border border-gray-100 p-3 rounded-xl bg-white flex justify-center items-center">
+                        <img id="usdtQrImg" src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=Pending" class="w-full h-full object-contain">
+                    </div>
+                    <div class="w-full mt-5 bg-white border border-gray-100 rounded-xl p-4 flex justify-between items-center shadow-md">
+                        <div class="truncate text-left pr-2">
+                            <span class="block text-[10px] font-bold text-gray-400">Wallet Address (TRC-20)</span>
+                            <p id="usdtAddressTxt" class="text-xs font-mono font-black truncate text-gray-800">Loading...</p>
+                        </div>
+                        <button onclick="copyAddressTextString()" class="bg-gray-50 text-gray-700 p-2.5 rounded-xl border text-xs shrink-0 cursor-pointer"><i class="fa-solid fa-copy"></i></button>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl p-1 space-y-3 border-b border-gray-100 pb-5">
+                    <div class="flex justify-between items-center px-1 text-xs font-bold">
+                        <span>Calculator</span> <span>1 USDT = <span id="calcRateSpan">0</span> INR</span>
+                    </div>
+                    <input id="inputUsdtAmount" oninput="calculateCryptoConversion()" type="number" placeholder="Please enter the input amount" class="w-full px-4 py-4 rounded-xl border border-gray-300 text-sm font-medium outline-none focus:border-black shadow-md">
+                    <div class="space-y-1 text-xs font-bold text-gray-800 px-1">
+                        <div class="flex justify-between"><span>Estimated bonus:</span><span><span id="calcBonusUsdt">0.00</span> (<span id="calcBonusPercent">0</span>%) INR</span></div>
+                        <div class="flex justify-between text-sm font-black"><span>Total:</span><span><span id="calcTotalInr">0.00</span> INR</span></div>
+                    </div>
+                </div>
+
+                <div class="space-y-4 pt-1">
+                    <div>
+                        <label class="block text-xs font-black text-gray-600 mb-1.5">Enter Transaction ID (TxID)</label>
+                        <input id="txtUserUsdtTxid" type="text" placeholder="Paste your USDT TxID here" class="w-full px-4 py-3.5 rounded-xl border border-gray-300 font-mono font-bold text-sm bg-white outline-none focus:border-[#1E56B2]">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-black text-gray-600 mb-2">Upload Payment Screenshot</label>
+                        <input type="file" id="fieldUsdtScreenshotField" accept="image/*" onchange="previewUsdtScreenshotBlobSelection()" class="hidden">
+                        <label for="fieldUsdtScreenshotField" class="w-full h-32 bg-gray-50 hover:bg-gray-100 border-2 border-dashed border-gray-200 rounded-2xl flex flex-col items-center justify-center cursor-pointer transition-all relative overflow-hidden">
+                            <div id="boxUsdtImgPreviewPlaceholder" class="text-center text-gray-400 flex flex-col items-center"><i class="fa-solid fa-camera text-2xl mb-1"></i><span class="text-[10px] font-bold">Upload Pic</span></div>
+                            <img id="imgUsdtPreviewElement" class="absolute inset-0 w-full h-full object-cover hidden">
+                        </label>
+                    </div>
+                    <button onclick="submitUsdtOrderToAdmin()" id="btnSubmitUsdt" class="w-full bg-[#1E56B2] hover:bg-blue-700 text-white font-black py-4 rounded-xl text-xs uppercase tracking-wider cursor-pointer shadow-md mt-2 transition-all">Submit Deposit Request</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="modalSelectSendUpi" class="fixed inset-0 bg-black/50 z-[60] flex flex-col justify-center items-center hidden transition-all p-4">
+            <div class="bg-white w-full max-w-[340px] rounded-[24px] p-6 shadow-2xl relative animate-slide-up">
+                <button onclick="closeModalWindow('modalSelectSendUpi')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-700 cursor-pointer text-lg"><i class="fa-solid fa-xmark"></i></button>
+                
+                <h3 class="text-center font-extrabold text-gray-900 text-[17px] mb-5">Select Send UPI</h3>
+                
+                <div id="sendUpiListContainer" class="max-h-56 overflow-y-auto space-y-3 hide-scrollbar px-1">
+                    </div>
+                
+                <div class="mt-5 pt-4 border-t border-gray-100">
+                    <h4 class="text-[13px] font-black text-orange-600 mb-1.5">Important Notice:</h4>
+                    <p class="text-[11px] font-semibold text-gray-600 leading-relaxed">
+                        Please select an <span class="text-red-500 font-bold">appropriate amount</span> for fast payment. <span class="text-red-500 font-bold">Multiple payment failures</span> will result in restrictions on the quantity of your order and payment time.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div id="modalSelectUpi" class="absolute inset-0 bg-black/50 z-50 flex flex-col justify-end hidden transition-all">
+            <div class="bg-white w-full rounded-t-3xl p-6 shadow-2xl space-y-5 animate-slide-up">
+                <div class="text-center font-black text-gray-800 text-base">Select Payment Gateway</div>
+                <div id="boxDynamicSendUpiRadioOptionAnchor" class="space-y-3"></div>
+                <div class="bg-amber-50 rounded-xl p-4 border border-amber-100 text-left mt-4">
+                    <span class="text-xs font-black text-amber-800 block mb-1">Important Notice:</span>
+                    <p class="text-[11px] font-semibold text-amber-700 leading-normal">Please follow platform guidelines. Multiple payment failures will result in trading restrictions.</p>
+                </div>
+                <button onclick="closeModalWindow('modalSelectUpi')" class="w-full bg-gray-100 hover:bg-gray-200 text-gray-600 py-3 rounded-xl font-bold text-xs uppercase cursor-pointer transition-colors">Cancel</button>
+            </div>
+        </div>
+
+        <div id="modalTaskDetail" class="absolute inset-0 bg-white z-50 flex flex-col justify-between hidden">
+            <div class="px-5 py-4 border-b border-gray-100 flex items-center bg-white sticky top-0 z-50">
+                <button onclick="closeModalWindow('modalTaskDetail')" class="text-gray-700 mr-4 text-base cursor-pointer"><i class="fa-solid fa-chevron-left"></i></button>
+                <h2 class="text-base font-black text-gray-800 flex-1 text-center pr-6">Manual Payment Details</h2>
+            </div>
+
+            <div class="flex-1 overflow-y-auto p-5 space-y-5 hide-scrollbar bg-white">
+                <div class="bg-rose-50 text-rose-600 font-bold text-xs py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 border border-rose-100 shadow-md">
+                    <i class="fa-regular fa-clock text-sm"></i> 
+                    <span class="tracking-wide">Time Left: <span id="lblCountdownTimerClock" class="font-mono font-black text-sm">05:00</span></span>
+                </div>
+
+                <div class="text-xs font-black text-[#1E56B2] uppercase tracking-wider pt-2 flex items-center gap-1"><i class="fa-solid fa-bank"></i> Receiver Bank Account</div>
+                <div class="space-y-3 bg-gray-50/60 p-4 rounded-2xl border border-gray-100">
+                    <div class="flex justify-between items-center text-xs"><span class="text-gray-400 font-bold">Account Number</span><div class="flex items-center space-x-2"><span id="lblBankCard" class="font-mono font-black text-[#1E56B2]">-</span><button onclick="copyText('lblBankCard')" class="text-gray-400"><i class="fa-regular fa-copy"></i></button></div></div>
+                    <div class="flex justify-between items-center text-xs"><span class="text-gray-400 font-bold">Bank Name</span><div class="flex items-center space-x-2"><span id="lblBankName" class="font-bold text-gray-800">-</span><button onclick="copyText('lblBankName')" class="text-gray-400"><i class="fa-regular fa-copy"></i></button></div></div>
+                    <div class="flex justify-between items-center text-xs"><span class="text-gray-400 font-bold">IFSC Code</span><div class="flex items-center space-x-2"><span id="lblBankIfsc" class="font-mono font-black text-gray-800">-</span><button onclick="copyText('lblBankIfsc')" class="text-gray-400"><i class="fa-regular fa-copy"></i></button></div></div>
+                    <div class="flex justify-between items-center text-xs"><span class="text-gray-400 font-bold">Payee Name</span><div class="flex items-center space-x-2"><span id="lblBankPayee" class="font-bold text-gray-800">-</span><button onclick="copyText('lblBankPayee')" class="text-gray-400"><i class="fa-regular fa-copy"></i></button></div></div>
+                    <div class="flex justify-between items-center text-xs"><span class="text-gray-400 font-bold">Money Amount</span><div class="flex items-center space-x-2"><span id="lblBankMoney" class="font-black text-red-600 text-sm">0 RS</span><button onclick="copyText('lblBankMoney')" class="text-gray-400"><i class="fa-regular fa-copy"></i></button></div></div>
+                </div>
+
+                <hr class="border-gray-100">
+
+                <div class="space-y-4 pt-1">
+                    <div>
+                        <label class="block text-xs font-black text-gray-600 mb-1.5">Enter Transaction UTR (UPI Ref. ID)</label>
+                        <input id="txtUserInrUtr" type="number" placeholder="12 Digit Transaction UTR" class="w-full px-4 py-3.5 rounded-xl border border-gray-300 font-mono font-bold text-sm bg-white outline-none focus:border-[#1E56B2]">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-black text-gray-600 mb-2">Upload Proof of Payment Screenshot</label>
+                        <input type="file" id="fieldInrScreenshotField" accept="image/*" onchange="previewInrScreenshotBlobSelection()" class="hidden">
+                        <label for="fieldInrScreenshotField" class="w-full h-32 bg-gray-50 hover:bg-gray-100 border-2 border-dashed border-gray-200 rounded-2xl flex flex-col items-center justify-center cursor-pointer transition-all relative overflow-hidden">
+                            <div id="boxImgPreviewPlaceholder" class="text-center text-gray-400 flex flex-col items-center"><i class="fa-solid fa-camera text-2xl mb-1"></i><span class="text-[10px] font-bold">Upload Pic</span></div>
+                            <img id="imgInrPreviewElement" class="absolute inset-0 w-full h-full object-cover hidden">
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-4 bg-white border-t border-gray-100 flex space-x-3 sticky bottom-0">
+                <button onclick="executeCancelOrderAction()" class="flex-1 bg-rose-500 hover:bg-rose-600 text-white font-bold py-3.5 rounded-xl text-xs uppercase tracking-wider cursor-pointer shadow-md">Cancel</button>
+                <button onclick="submitInrOrderToAdmin()" id="btnSubmitInr" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-black py-3.5 rounded-xl text-xs uppercase tracking-wider cursor-pointer shadow-md">Submit Details</button>
+            </div>
+        </div>
+
+        <div class="absolute bottom-0 inset-x-0 bg-white border-t border-gray-100 px-2 py-2.5 flex justify-between items-center shadow-[0_-4px_20px_rgba(0,0,0,0.03)] z-40">
+            <button onclick="window.location.href='home.html'" class="footer-tab flex-1 flex flex-col items-center gap-1 text-gray-400 font-medium transition-all cursor-pointer"><i class="fa-solid fa-house text-lg"></i> <span class="text-[10px] tracking-wide">Home</span></button>
+            <button onclick="window.location.href='deposit.html'" class="footer-tab flex-1 flex flex-col items-center gap-1 text-[#1E56B2] font-bold transition-all cursor-pointer"><i class="fa-solid fa-right-left text-lg"></i> <span class="text-[10px] tracking-wide">Deposit</span></button>
+            <button onclick="window.location.href='upi.html'" class="footer-tab flex-1 flex flex-col items-center gap-1 text-gray-400 font-medium transition-all cursor-pointer"><i class="fa-solid fa-briefcase text-lg"></i> <span class="text-[10px] tracking-wide">UPI</span></button>
+            <button onclick="window.location.href='team.html'" class="footer-tab flex-1 flex flex-col items-center gap-1 text-gray-400 font-medium transition-all cursor-pointer"><i class="fa-solid fa-chart-pie text-lg"></i> <span class="text-[10px] tracking-wide">Team</span></button>
+            <button onclick="window.location.href='me.html'" class="footer-tab flex-1 flex flex-col items-center gap-1 text-gray-400 font-medium transition-all cursor-pointer"><i class="fa-solid fa-user-astronaut text-lg"></i> <span class="text-[10px] tracking-wide">Me</span></button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, doc, collection, onSnapshot, query, orderBy, addDoc, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCHoR7wojkpTZZPR-gcfDnPW8aOTuoiaAU",
+            authDomain: "nexapay-342d0.firebaseapp.com",
+            databaseURL: "https://nexapay-342d0-default-rtdb.firebaseio.com",
+            projectId: "nexapay-342d0",
+            storageBucket: "nexapay-342d0.firebasestorage.app",
+            messagingSenderId: "305096071099",
+            appId: "1:305096071099:web:3db1e75a2669adbcae569e"
+        };
+        
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Global Configurations
+        window.currentScopeGateTab = 'inr';
+        window.currentInrSubTabClass = 'Task'; 
+        window.currentFilterSortDirectionDirection = 'LOW-TO-HIGH';
+        window.activeScopeSessionUserIdentityUid = localStorage.getItem('sessionUserIdentityId') || 'UID_UNKNOWN';
+
+        window.globalUsdtRate = 0;
+        window.globalBonusRatio = 0;
+        window.systemGatewaySettings = { manual: true, fast: true };
+
+        window.currentActiveCountdownTimerObjectRef = null;
+        window.selectedTaskAmountValuePool = 0;
+        window.temporaryScreenshotBase64Payload = '';
+        window.temporaryUsdtScreenshotBase64 = '';
+        
+        let localFetchedTasksArray = [];
+        window.userSendUpiList = [];
+        window.selectedSenderUpi = ''; // Tracks the UPI selected in the new popup
+
+        // 🚨 FETCH USER'S ACTIVE "SEND" UPI ACCOUNTS 🚨
+        const qUserUpis = query(
+            collection(db, "user_upi_accounts"),
+            where("ownerUserId", "==", window.activeScopeSessionUserIdentityUid),
+            where("scopeChannel", "==", "send"),
+            where("isSaleActive", "==", true)
+        );
+        onSnapshot(qUserUpis, (snapshot) => {
+            window.userSendUpiList = [];
+            snapshot.forEach(docSnap => {
+                window.userSendUpiList.push({ id: docSnap.id, ...docSnap.data() });
+            });
+        });
+
+        // 1. SYNC GATEWAY SETTINGS & BANK DETAILS FROM ADMIN FIRESTORE
+        onSnapshot(doc(db, "system_settings", "gateway_config"), (docSnap) => {
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                window.systemGatewaySettings = {
+                    manual: data.manualPaymentEnabled !== false,
+                    fast: data.fastPaymentEnabled !== false
+                };
+                
+                // Set Bank Details
+                document.getElementById('lblBankCard').innerText = data.accountNumber || '-';
+                document.getElementById('lblBankName').innerText = data.bankName || '-';
+                document.getElementById('lblBankIfsc').innerText = data.ifscCode || '-';
+                document.getElementById('lblBankPayee').innerText = data.payeeName || '-';
+
+                // Set USDT Details
+                document.getElementById('usdtAddressTxt').innerText = data.usdtWallet || 'Loading...';
+                if(data.usdtQrBase64) document.getElementById('usdtQrImg').src = data.usdtQrBase64;
+            }
+        });
+
+        // 2. SYNC MASTER SETTINGS (USDT Rate & Bonus)
+        onSnapshot(doc(db, "system_settings", "master_config"), (docSnap) => {
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                window.globalUsdtRate = Number(data.usdtRate) || 90;
+                window.globalBonusRatio = Number(data.depBonusUsdt) || 0;
+                
+                document.getElementById('calcRateSpan').innerText = window.globalUsdtRate;
+                document.getElementById('calcBonusPercent').innerText = window.globalBonusRatio;
+                window.calculateCryptoConversion();
+            }
+        });
+
+        // 3. SYNC LIVE SLABS FROM ADMIN PANEL
+        const qTasks = query(collection(db, "tasks"), orderBy("amount", "asc"));
+        onSnapshot(qTasks, (snapshot) => {
+            localFetchedTasksArray = [];
+            snapshot.forEach((docSnap) => {
+                localFetchedTasksArray.push({ _id: docSnap.id, ...docSnap.data() });
+            });
+            window.renderInrTasks();
+        });
+
+        // --- UI LOGIC ---
+        window.switchCategoryGateTab = function(categoryType) { 
+            window.currentScopeGateTab = categoryType;
+            const btnInr = document.getElementById('tabBtn-inr');
+            const btnUsdt = document.getElementById('tabBtn-usdt');
+            const secInr = document.getElementById('section-inr');
+            const secUsdt = document.getElementById('section-usdt');
+
+            if(categoryType === 'inr') {
+                secInr.classList.remove('hidden'); secUsdt.classList.add('hidden');
+                btnInr.className = "text-gray-900 border-b-2 border-black pb-2 font-black cursor-pointer";
+                btnUsdt.className = "pb-2 border-b-2 border-transparent font-bold text-gray-400 cursor-pointer";
+            } else {
+                secInr.classList.add('hidden'); secUsdt.classList.remove('hidden');
+                btnInr.className = "pb-2 border-b-2 border-transparent font-bold text-gray-400 cursor-pointer";
+                btnUsdt.className = "text-gray-900 border-b-2 border-black pb-2 font-black cursor-pointer";
+            }
+        };
+
+        window.switchInrSubCategoryTab = function(subClassName) {
+            window.currentInrSubTabClass = subClassName;
+            document.getElementById('subTabBtn-Task').className = subClassName === 'Task' ? "text-gray-900 border-b-2 border-black pb-1 font-black cursor-pointer" : "pb-1 border-b-2 border-transparent cursor-pointer";
+            document.getElementById('subTabBtn-VIP').className = subClassName === 'VIP' ? "text-gray-900 border-b-2 border-black pb-1 font-black cursor-pointer" : "pb-1 border-b-2 border-transparent cursor-pointer";
+            window.renderInrTasks();
+        };
+
+        window.toggleSortDirectionCriteriaValue = function() {
+            window.currentFilterSortDirectionDirection = (window.currentFilterSortDirectionDirection === 'LOW-TO-HIGH') ? 'HIGH-TO-LOW' : 'LOW-TO-HIGH';
+            document.getElementById('lblCurrentSortDirectionText').innerText = (window.currentFilterSortDirectionDirection === 'LOW-TO-HIGH') ? 'From low to high' : 'From high to low';
+            window.renderInrTasks();
+        };
+
+        window.triggerTaskFilterProcessing = function() { window.renderInrTasks(); };
+        window.resetAndRefreshTaskGridConsole = function() { document.getElementById('txtFilterMinRange').value = ''; document.getElementById('txtFilterMaxRange').value = ''; window.renderInrTasks(); };
+
+        window.renderInrTasks = function() {
+            const container = document.getElementById('inrTasksContainer');
+            if(!container) return;
+            container.innerHTML = '';
+
+            const minVal = parseFloat(document.getElementById('txtFilterMinRange').value) || 0;
+            const maxVal = parseFloat(document.getElementById('txtFilterMaxRange').value) || Infinity;
+
+            let visibleFilteredTasksList = [...localFetchedTasksArray];
+
+            if(window.currentInrSubTabClass === 'Task') {
+                visibleFilteredTasksList = visibleFilteredTasksList.filter(task => task.amount <= 10000);
+            } else {
+                visibleFilteredTasksList = visibleFilteredTasksList.filter(task => task.amount > 10000);
+            }
+
+            visibleFilteredTasksList = visibleFilteredTasksList.filter(task => task.amount >= minVal && task.amount <= maxVal);
+
+            if(window.currentFilterSortDirectionDirection === 'LOW-TO-HIGH') {
+                visibleFilteredTasksList.sort((a,b) => a.amount - b.amount);
+            } else {
+                visibleFilteredTasksList.sort((a,b) => b.amount - a.amount);
+            }
+
+            if(visibleFilteredTasksList.length === 0) {
+                container.innerHTML = `<p class="text-xs text-gray-400 text-center py-6 italic bg-gray-50 border rounded-2xl">No active task plans matching filter.</p>`;
+                return;
+            }
+
+            visibleFilteredTasksList.forEach(task => {
+                const calculatedTotal = parseFloat(task.quotaReward) || (parseFloat(task.amount) + (parseFloat(task.amount) * (parseFloat(task.percent) / 100)));
+                
+                const cardNodeRow = document.createElement('div');
+                cardNodeRow.className = "bg-white p-3.5 flex justify-between items-center border-b border-gray-100 text-left";
+                cardNodeRow.innerHTML = `
+                    <div>
+                        <h3 class="text-base font-extrabold text-gray-900 tracking-tight">${parseFloat(task.amount).toFixed(0)} RS</h3>
+                        <div class="flex space-x-6 text-xs mt-1 text-gray-400 font-semibold tracking-wide">
+                            <div>Daily Income<span class="block text-gray-800 font-black mt-0.5">${task.percent}%</span></div>
+                            <div>Quota Reward<span class="block text-[#0ea5e9] font-black mt-0.5">+${calculatedTotal.toFixed(0)}</span></div>
+                        </div>
+                    </div>
+                    <button onclick="handleTaskBuyActionTrigger(${task.amount})" class="bg-black text-white text-xs font-black px-6 py-2.5 rounded-lg hover:bg-gray-900 shadow-xs cursor-pointer transition-colors">Buy</button>
+                `;
+                container.appendChild(cardNodeRow);
+            });
+        };
+
+        // --- GATEWAY LOGIC ---
+
+        // 🚨 MODIFIED: INTERCEPT BUY ACTION TO SHOW SEND UPI SELECTION FIRST 🚨
+        window.handleTaskBuyActionTrigger = async function(amount) {
+            window.selectedTaskAmountValuePool = amount;
+
+            const container = document.getElementById('sendUpiListContainer');
+            container.innerHTML = '';
+
+            if (window.userSendUpiList.length === 0) {
+                // If user hasn't added any "Send" UPI in upi.html
+                container.innerHTML = `
+                    <div class="text-center p-5 space-y-3">
+                        <i class="fa-solid fa-wallet text-3xl text-gray-300"></i>
+                        <p class="text-sm font-bold text-gray-500 leading-tight">No Send UPI accounts found.</p>
+                        <button onclick="window.location.href='upi.html'" class="w-full bg-[#1E56B2] text-white py-3 rounded-xl text-xs font-bold shadow-md cursor-pointer mt-2">Add Send UPI Account</button>
+                    </div>`;
+            } else {
+                // Render User's Send UPIs mimicking Image 2 styling
+                window.userSendUpiList.forEach(upi => {
+                    let iconHtml = `<div class="w-8 h-8 rounded-full bg-orange-500 flex items-center justify-center text-white text-[10px] shrink-0"><i class="${upi.iconClass || 'fa-solid fa-paper-plane'}"></i></div>`;
+                    if(upi.providerName === 'PhonePe' || upi.providerName === 'PhonePe Business') iconHtml = `<div class="w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center text-white text-[10px] shrink-0"><i class="fa-solid fa-p"></i></div>`;
+                    else if(upi.providerName === 'Paytm' || upi.providerName === 'Paytm Business') iconHtml = `<div class="w-8 h-8 rounded-full bg-sky-500 flex items-center justify-center text-white text-[8px] font-black shrink-0">Paytm</div>`;
+
+                    container.innerHTML += `
+                        <div onclick="proceedToPaymentGateway('${upi.vpaAddress}')" class="flex items-center justify-between p-3.5 border border-gray-100 rounded-[14px] hover:border-[#1E56B2] hover:bg-blue-50/30 cursor-pointer transition-all shadow-sm">
+                            <div class="flex items-center gap-3 overflow-hidden">
+                                ${iconHtml}
+                                <span class="text-[13px] font-bold text-[#1E56B2] truncate">${upi.vpaAddress}</span>
+                            </div>
+                            <i class="fa-solid fa-chevron-right text-[#1E56B2] text-xs"></i>
+                        </div>
+                    `;
+                });
+            }
+
+            document.getElementById('modalSelectSendUpi').classList.remove('hidden');
+        };
+
+        // 🚨 NEW: CONTINUES TO OLD GATEWAY LOGIC AFTER SELECTING UPI 🚨
+        window.proceedToPaymentGateway = function(vpaAddress) {
+            window.selectedSenderUpi = vpaAddress;
+            document.getElementById('modalSelectSendUpi').classList.add('hidden');
+            
+            // Build the gateway options exactly as before
+            const optionBoxContainer = document.getElementById('boxDynamicSendUpiRadioOptionAnchor');
+            optionBoxContainer.innerHTML = '';
+
+            let hasActiveGateway = false;
+
+            if (window.systemGatewaySettings.fast) {
+                hasActiveGateway = true;
+                const fastOption = document.createElement('div');
+                fastOption.setAttribute("onclick", "executeDirectModeGatewayRouting()");
+                fastOption.className = "w-full p-4 border border-gray-100 rounded-2xl flex items-center justify-between cursor-pointer hover:bg-blue-50 bg-white shadow-sm transition-all";
+                fastOption.innerHTML = `
+                    <div class="flex items-center space-x-3 text-left">
+                        <div class="w-8 h-8 rounded-lg bg-blue-100 text-[#1E56B2] text-xs font-black flex items-center justify-center"><i class="fa-solid fa-bolt"></i></div>
+                        <div><span class="text-sm font-black text-gray-800 block">Fast Payment</span></div>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-gray-400 text-xs"></i>`;
+                optionBoxContainer.appendChild(fastOption);
+            }
+
+            if (window.systemGatewaySettings.manual) {
+                hasActiveGateway = true;
+                const manualOption = document.createElement('div');
+                manualOption.setAttribute("onclick", "openManualPaymentModal()");
+                manualOption.className = "w-full p-4 border border-gray-100 rounded-2xl flex items-center justify-between cursor-pointer hover:bg-gray-50 bg-white shadow-sm transition-all";
+                manualOption.innerHTML = `
+                    <div class="flex items-center space-x-3 text-left">
+                        <div class="w-8 h-8 rounded-lg bg-gray-100 text-gray-600 text-xs font-black flex items-center justify-center"><i class="fa-solid fa-money-bill-transfer"></i></div>
+                        <div><span class="text-sm font-black text-gray-800 block">Manual Bank/UPI Transfer</span></div>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-gray-400 text-xs"></i>`;
+                optionBoxContainer.appendChild(manualOption);
+            }
+
+            if (!hasActiveGateway) {
+                optionBoxContainer.innerHTML = `<p class="text-xs text-red-500 font-bold text-center p-3">All payment gateways are currently disabled.</p>`;
+            }
+
+            document.getElementById('modalSelectUpi').classList.remove('hidden');
+        };
+
+        window.openManualPaymentModal = function() {
+            window.closeModalWindow('modalSelectUpi');
+            document.getElementById('lblBankMoney').innerText = window.selectedTaskAmountValuePool + " RS";
+            document.getElementById('modalTaskDetail').classList.remove('hidden');
+            window.initializeFiveMinutesCountdownClockTimer();
+        };
+
+        window.executeDirectModeGatewayRouting = async function() {
+            window.closeModalWindow('modalSelectUpi');
+            
+            const loader = document.getElementById('fastPaymentProgressLoader');
+            if (loader) {
+                loader.querySelector('p').innerText = "Initiating Fast Payment Secure Gateway Connection... Please wait.";
+                loader.classList.remove('hidden');
+            }
+
+            try {
+                const response = await fetch(`http://localhost:3000/api/create-order`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ amount: window.selectedTaskAmountValuePool, userId: window.activeScopeSessionUserIdentityUid })
+                });
+
+                const result = await response.json();
+                if (loader) loader.classList.add('hidden');
+
+                if (result.success && result.payment_url) {
+                    window.location.href = result.payment_url; 
+                } else {
+                    alert(result.message || "Fast Payment gateway connection failed.");
+                }
+            } catch (err) {
+                if (loader) loader.classList.add('hidden');
+                console.error("Fast Gateway Router Error: ", err.message);
+                alert("Server timeout. Ensure your Node.js Backend Server is running in PowerShell.");
+            }
+        };
+
+        // --- IMAGE UPLOADS ---
+        window.previewInrScreenshotBlobSelection = function() { 
+            const fileInput = document.getElementById('fieldInrScreenshotField'); 
+            if(fileInput.files && fileInput.files[0]) { 
+                const reader = new FileReader(); 
+                reader.onload = function(e) { 
+                    window.temporaryScreenshotBase64Payload = e.target.result; 
+                    document.getElementById('imgInrPreviewElement').src = window.temporaryScreenshotBase64Payload; 
+                    document.getElementById('imgInrPreviewElement').classList.remove('hidden'); 
+                    document.getElementById('boxImgPreviewPlaceholder').classList.add('hidden'); 
+                }; 
+                reader.readAsDataURL(fileInput.files[0]); 
+            } 
+        };
+
+        window.previewUsdtScreenshotBlobSelection = function() { 
+            const fileInput = document.getElementById('fieldUsdtScreenshotField'); 
+            if(fileInput.files && fileInput.files[0]) { 
+                const reader = new FileReader(); 
+                reader.onload = function(e) { 
+                    window.temporaryUsdtScreenshotBase64 = e.target.result; 
+                    document.getElementById('imgUsdtPreviewElement').src = window.temporaryUsdtScreenshotBase64; 
+                    document.getElementById('imgUsdtPreviewElement').classList.remove('hidden'); 
+                    document.getElementById('boxUsdtImgPreviewPlaceholder').classList.add('hidden'); 
+                }; 
+                reader.readAsDataURL(fileInput.files[0]); 
+            } 
+        };
+
+        // --- SUBMISSIONS (INR & USDT TO FIRESTORE) ---
+        window.submitInrOrderToAdmin = async function() {
+            const btn = document.getElementById('btnSubmitInr');
+            const utrStringVal = document.getElementById('txtUserInrUtr').value.trim();
+            if(utrStringVal.length < 12 || isNaN(utrStringVal)) { alert("Please input complete valid 12 digit UTR code!"); return; }
+            if(!window.temporaryScreenshotBase64Payload) { alert("Please upload the transaction payment screenshot!"); return; }
+            
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing...';
+            btn.disabled = true;
+
+            try {
+                await addDoc(collection(db, "deposits"), {
+                    userId: window.activeScopeSessionUserIdentityUid,
+                    amount: window.selectedTaskAmountValuePool,
+                    type: 'INR',
+                    status: 'Pending',
+                    utr: utrStringVal,
+                    senderUpi: window.selectedSenderUpi || 'N/A', // Tracking the selected send UPI
+                    proofImage: window.temporaryScreenshotBase64Payload,
+                    createdAt: new Date().toLocaleString('en-IN')
+                });
+                
+                clearInterval(window.currentActiveCountdownTimerObjectRef);
+                window.closeModalWindow('modalTaskDetail');
+                alert("Manual proof submitted. Pending admin verification.");
+                
+                // Reset
+                document.getElementById('txtUserInrUtr').value = '';
+                document.getElementById('imgInrPreviewElement').src = '';
+                document.getElementById('imgInrPreviewElement').classList.add('hidden');
+                document.getElementById('boxImgPreviewPlaceholder').classList.remove('hidden');
+                window.temporaryScreenshotBase64Payload = '';
+            } catch (err) {
+                alert("Database Error: " + err.message);
+            } finally {
+                btn.innerHTML = 'Submit Details';
+                btn.disabled = false;
+            }
+        };
+
+        window.submitUsdtOrderToAdmin = async function() {
+            const btn = document.getElementById('btnSubmitUsdt');
+            const amtUsdt = parseFloat(document.getElementById('inputUsdtAmount').value);
+            if(!amtUsdt || amtUsdt <= 0) { alert("Please enter a valid USDT amount!"); return; }
+            
+            const txidVal = document.getElementById('txtUserUsdtTxid').value.trim();
+            if(!txidVal) { alert("Please enter the Transaction ID (TxID)!"); return; }
+            
+            if(!window.temporaryUsdtScreenshotBase64) { alert("Please upload the USDT payment screenshot!"); return; }
+
+            // Live Calculated values extraction for storing safely in database
+            const calculatedBaseInrValue = parseFloat(document.getElementById('calcBaseInrHidden')?.value || (amtUsdt * window.globalUsdtRate));
+            const calculatedBonusInrValue = parseFloat(document.getElementById('calcBonusInrHidden')?.value || ((amtUsdt * window.globalUsdtRate) * window.globalBonusRatio / 100));
+            const calculatedTotalInrValue = parseFloat(document.getElementById('calcTotalInrHidden')?.value || (calculatedBaseInrValue + calculatedBonusInrValue));
+
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing...';
+            btn.disabled = true;
+
+            try {
+                // Storing complete explicit schema for the Admin Confirm Pop-up reference mapping
+                await addDoc(collection(db, "deposits"), {
+                    userId: window.activeScopeSessionUserIdentityUid,
+                    amount: amtUsdt,               
+                    baseInr: calculatedBaseInrValue, 
+                    bonusInr: calculatedBonusInrValue, 
+                    totalInr: calculatedTotalInrValue, 
+                    bonusPercent: window.globalBonusRatio, 
+                    type: 'USDT',
+                    status: 'Pending',
+                    txid: txidVal,
+                    proofImage: window.temporaryUsdtScreenshotBase64,
+                    createdAt: new Date().toLocaleString('en-IN')
+                });
+
+                alert("USDT deposit proof submitted successfully. Pending admin verification.");
+                
+                // Reset Fields
+                document.getElementById('inputUsdtAmount').value = '';
+                document.getElementById('txtUserUsdtTxid').value = '';
+                document.getElementById('imgUsdtPreviewElement').src = '';
+                document.getElementById('imgUsdtPreviewElement').classList.add('hidden');
+                document.getElementById('boxUsdtImgPreviewPlaceholder').classList.remove('hidden');
+                window.temporaryUsdtScreenshotBase64 = '';
+                window.calculateCryptoConversion();
+            } catch (err) {
+                alert("Database Error: " + err.message);
+            } finally {
+                btn.innerHTML = 'Submit Deposit Request';
+                btn.disabled = false;
+            }
+        };
+
+        // Utilities
+        window.initializeFiveMinutesCountdownClockTimer = function() {
+            clearInterval(window.currentActiveCountdownTimerObjectRef);
+            let timeRemaining = 5 * 60; 
+            const lblClock = document.getElementById('lblCountdownTimerClock');
+            window.currentActiveCountdownTimerObjectRef = setInterval(() => {
+                let m = Math.floor(timeRemaining / 60); let s = timeRemaining % 60;
+                lblClock.innerText = `${m < 10 ? '0'+m : m}:${s < 10 ? '0'+s : s}`;
+                if(timeRemaining <= 0) {
+                    clearInterval(window.currentActiveCountdownTimerObjectRef);
+                    window.closeModalWindow('modalTaskDetail');
+                    alert(`MANUAL TIMER COMPLETED:\nOrder discarded.`);
+                }
+                timeRemaining--;
+            }, 1000);
+        };
+
+        window.executeCancelOrderAction = function() {
+            if(!confirm("Are you sure you want to cancel this manual transaction?")) return;
+            clearInterval(window.currentActiveCountdownTimerObjectRef);
+            window.closeModalWindow('modalTaskDetail');
+        };
+
+        window.copyText = function(id) { navigator.clipboard.writeText(document.getElementById(id).innerText); alert("Copied!"); };
+        window.closeModalWindow = function(id) { document.getElementById(id).classList.add('hidden'); };
+        window.copyAddressTextString = function() { navigator.clipboard.writeText(document.getElementById('usdtAddressTxt').innerText); alert("Wallet Address copied!"); };
+        
+        window.calculateCryptoConversion = function() { 
+            const amt = parseFloat(document.getElementById('inputUsdtAmount').value) || 0; 
+            
+            const baseInr = amt * window.globalUsdtRate;
+            const bonusInr = baseInr * window.globalBonusRatio / 100;
+            const totalInr = baseInr + bonusInr;
+
+            // UI Rendering fields update
+            document.getElementById('calcBonusUsdt').innerText = bonusInr.toFixed(2); 
+            document.getElementById('calcTotalInr').innerText = totalInr.toFixed(2); 
+
+            // Creating hidden reference nodes dynamically if not present for state persistent pool collection
+            let baseInrNode = document.getElementById('calcBaseInrHidden');
+            if(!baseInrNode) {
+                baseInrNode = document.createElement('input');
+                baseInrNode.type = 'hidden';
+                baseInrNode.id = 'calcBaseInrHidden';
+                document.body.appendChild(baseInrNode);
+            }
+            baseInrNode.value = baseInr;
+
+            let bonusInrNode = document.getElementById('calcBonusInrHidden');
+            if(!bonusInrNode) {
+                bonusInrNode = document.createElement('input');
+                bonusInrNode.type = 'hidden';
+                bonusInrNode.id = 'calcBonusInrHidden';
+                document.body.appendChild(bonusInrNode);
+            }
+            bonusInrNode.value = bonusInr;
+
+            let totalInrNode = document.getElementById('calcTotalInrHidden');
+            if(!totalInrNode) {
+                totalInrNode = document.createElement('input');
+                totalInrNode.type = 'hidden';
+                totalInrNode.id = 'calcTotalInrHidden';
+                document.body.appendChild(totalInrNode);
+            }
+            totalInrNode.value = totalInr;
+        };
+    </script>
+</body>
+</html>
