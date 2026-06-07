@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexaPay Admin - Deposits</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #F8F9FA; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .sidebar-transition { transition: transform 0.3s ease-in-out; }
+    </style>
+
+    <!-- SECURITY: AUTH GUARD -->
+    <script>
+        if (localStorage.getItem('nexaAdminAuth') !== 'true') {
+            window.location.href = 'index.html'; 
+        }
+        function adminLogout() {
+            if(confirm("Are you sure you want to log out from NexaPay Admin?")) {
+                localStorage.removeItem('nexaAdminAuth');
+                window.location.href = 'index.html';
+            }
+        }
+    </script>
+</head>
+<body class="text-gray-800 antialiased">
+
+    <!-- Mobile Sidebar Overlay -->
+    <div id="sidebarOverlay" class="fixed inset-0 bg-gray-900 bg-opacity-40 z-40 hidden" onclick="toggleSidebar()"></div>
+
+    <!-- Sidebar Layout -->
+    <aside id="sidebar" class="w-[280px] bg-white border-r border-gray-100 flex flex-col justify-between h-screen fixed left-0 top-0 z-50 transform -translate-x-full md:translate-x-0 sidebar-transition">
+        <div class="flex-1 overflow-y-auto no-scrollbar">
+            <div class="px-6 py-6 flex items-center justify-between">
+                <span class="text-[22px] font-extrabold text-blue-600 tracking-tight">NexaPay</span>
+                <button onclick="toggleSidebar()" class="md:hidden text-gray-500"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            
+            <nav class="mt-2 px-4 space-y-1.5">
+                <a href="dashboard.html" class="flex items-center gap-4 px-4 py-3 text-gray-500 hover:bg-gray-50 hover:text-gray-900 rounded-xl font-medium text-sm transition">
+                    <i class="fa-solid fa-border-all w-5 text-center"></i> Dashboard
+                </a>
+                <a href="deposit.html" class="flex items-center gap-4 px-4 py-3 bg-blue-50 text-blue-600 rounded-xl font-bold text-sm">
+                    <i class="fa-solid fa-wallet w-5 text-center"></i> Deposits
+                </a>
+                <a href="gateway-settings.html" class="flex items-center gap-4 px-4 py-3 text-gray-500 hover:bg-gray-50 hover:text-gray-900 rounded-xl font-medium text-sm transition">
+                    <i class="fa-solid fa-plug w-5 text-center"></i> Gateway Settings
+                </a>
+                <a href="user.html" class="flex items-center gap-4 px-4 py-3 text-gray-500 hover:bg-gray-50 hover:text-gray-900 rounded-xl font-medium text-sm transition">
+                    <i class="fa-solid fa-users w-5 text-center"></i> Users
+                </a>
+                <a href="payouts.html" class="flex items-center gap-4 px-4 py-3 text-gray-500 hover:bg-gray-50 hover:text-gray-900 rounded-xl font-medium text-sm transition">
+                    <i class="fa-solid fa-money-bill-wave w-5 text-center"></i> Payouts
+                </a>
+                <a href="team-commission.html" class="flex items-center gap-4 px-4 py-3 text-gray-500 hover:bg-gray-50 hover:text-gray-900 rounded-xl font-medium text-sm transition">
+                    <i class="fa-solid fa-network-wired w-5 text-center"></i> Team & Commission
+                </a>
+                <a href="reports.html" class="flex items-center gap-4 px-4 py-3 text-gray-500 hover:bg-gray-50 hover:text-gray-900 rounded-xl font-medium text-sm transition">
+                    <i class="fa-solid fa-chart-line w-5 text-center"></i> Reports
+                </a>
+                <a href="withdrawals.html" class="flex items-center gap-4 px-4 py-3 text-gray-500 hover:bg-gray-50 hover:text-gray-900 rounded-xl font-medium text-sm transition">
+                    <i class="fa-solid fa-building-columns w-5 text-center"></i> Withdrawals
+                </a>
+                <a href="master-settings.html" class="flex items-center gap-4 px-4 py-3 text-gray-500 hover:bg-gray-50 hover:text-gray-900 rounded-xl font-medium text-sm transition">
+                    <i class="fa-solid fa-gear w-5 text-center"></i> Master Settings
+                </a>
+            </nav>
+        </div>
+        <div class="p-5 border-t border-gray-100 flex items-center justify-between bg-white">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-blue-100 text-blue-600 font-black rounded-full flex items-center justify-center">A</div>
+                <div>
+                    <h4 class="text-sm font-bold text-gray-900">Super Admin</h4>
+                    <p class="text-[11px] text-gray-400 font-medium">admin@nexapay.com</p>
+                </div>
+            </div>
+            <button onclick="adminLogout()" class="text-gray-400 hover:text-red-500 p-2 rounded-lg transition"><i class="fa-solid fa-right-from-bracket text-lg"></i></button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="md:ml-[280px] min-h-screen pb-12">
+        <header class="bg-white px-6 md:px-10 py-5 sticky top-0 z-30 border-b border-gray-100 flex justify-between items-center">
+            <div class="flex items-center gap-4">
+                <button onclick="toggleSidebar()" class="md:hidden text-gray-500 text-xl"><i class="fa-solid fa-bars"></i></button>
+                <h1 class="text-[20px] font-medium text-gray-800">Deposits & Tasks</h1>
+            </div>
+            <div class="flex items-center gap-1.5 px-3 py-1.5 bg-green-50 text-green-600 text-xs font-bold rounded-full border border-green-100">
+                <span class="w-2 h-2 rounded-full bg-green-500"></span> Active
+            </div>
+        </header>
+
+        <div class="p-4 md:p-8 max-w-[1200px] mx-auto space-y-8">
+            <!-- STATS CARDS -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+                <div class="bg-white p-6 rounded-2xl shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-gray-100 relative">
+                    <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Pending INR</p>
+                    <h3 class="text-3xl font-black text-gray-900 mt-2" id="livePendingInr">0</h3>
+                    <p class="text-[11px] font-medium text-amber-500 mt-2 flex items-center gap-1"><span class="w-2 h-2 rounded-full border-2 border-amber-500"></span> Awaiting verification</p>
+                </div>
+                <div class="bg-white p-6 rounded-2xl shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-gray-100 relative">
+                    <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Pending USDT</p>
+                    <h3 class="text-3xl font-black text-gray-900 mt-2" id="livePendingUsdt">0</h3>
+                    <p class="text-[11px] font-medium text-gray-400 mt-2">Awaiting TxID verification</p>
+                </div>
+                <div class="bg-white p-6 rounded-2xl shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-gray-100 relative">
+                    <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Verified Today</p>
+                    <h3 class="text-3xl font-black text-gray-900 mt-2" id="liveVerifiedToday">0</h3>
+                    <p class="text-[11px] font-medium text-gray-400 mt-2">Total approved today</p>
+                </div>
+                <div class="bg-white p-6 rounded-2xl shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-gray-100 relative">
+                    <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Rejection Rate</p>
+                    <h3 class="text-3xl font-black text-gray-900 mt-2" id="liveRejectionRate">0.0%</h3>
+                    <p class="text-[11px] font-medium text-gray-400 mt-2">Based on all processed</p>
+                </div>
+            </div>
+
+            <!-- DEPOSITS MANAGER SECTION -->
+            <div class="bg-white rounded-2xl shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-gray-100">
+                <div class="p-6 border-b border-gray-100 flex flex-col md:flex-row justify-between items-center gap-4">
+                    <div class="flex bg-gray-50 p-1 rounded-xl w-full md:w-auto">
+                        <button onclick="filterDeposits('All')" id="tabAll" class="flex-1 md:flex-none px-6 py-2 rounded-lg text-sm font-bold bg-white text-blue-600 shadow-sm transition">All Deposits</button>
+                        <button onclick="filterDeposits('INR')" id="tabINR" class="flex-1 md:flex-none px-6 py-2 rounded-lg text-sm font-bold text-gray-500 hover:text-gray-900 transition">INR Deposits</button>
+                        <button onclick="filterDeposits('USDT')" id="tabUSDT" class="flex-1 md:flex-none px-6 py-2 rounded-lg text-sm font-bold text-gray-500 hover:text-gray-900 transition">USDT Deposits</button>
+                    </div>
+                    <div class="relative w-full md:w-64">
+                        <i class="fa-solid fa-magnifying-glass absolute left-4 top-3.5 text-gray-400"></i>
+                        <input type="text" id="searchInput" placeholder="Search User ID or UTR..." class="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-blue-500">
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto no-scrollbar min-h-[300px]">
+                    <table class="w-full text-left whitespace-nowrap">
+                        <thead class="text-[11px] font-bold text-gray-500 uppercase tracking-wider bg-gray-50/50">
+                            <tr>
+                                <th class="px-6 py-4">USER DETAILS</th>
+                                <th class="px-6 py-4">AMOUNT & EXPECTED RETURN</th>
+                                <th class="px-6 py-4">REFERENCE (UTR/TXID)</th>
+                                <th class="px-6 py-4 text-center">VERIFICATION</th>
+                                <th class="px-6 py-4 text-center">ACTION QUEUE</th>
+                            </tr>
+                        </thead>
+                        <tbody id="depositsTableBody" class="divide-y divide-gray-100 text-sm">
+                            <tr><td colspan="5" class="p-8 text-center text-gray-400 text-sm">Fetching live deposits...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- TASK SYSTEM CONTROL -->
+            <div class="bg-white rounded-2xl shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-gray-100 p-6 md:p-8">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center text-xl">
+                            <i class="fa-solid fa-layer-group"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-lg font-bold text-gray-900">Task System Control</h2>
+                            <p class="text-xs text-gray-400 font-medium">Manage investment slabs and earning logic for users</p>
+                        </div>
+                    </div>
+                    <button onclick="openModal('addSlabModal')" class="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition shadow-md shadow-blue-200">
+                        <i class="fa-solid fa-plus"></i> Add Slab
+                    </button>
+                </div>
+
+                <div class="overflow-x-auto no-scrollbar">
+                    <table class="w-full text-left text-sm whitespace-nowrap">
+                        <thead class="border-b border-gray-100 text-[11px] font-bold text-gray-800 uppercase tracking-wider">
+                            <tr>
+                                <th class="pb-4">INVESTMENT (INR)</th>
+                                <th class="pb-4">DAILY INCOME (%)</th>
+                                <th class="pb-4">QUOTA REWARD (TOTAL INR)</th>
+                                <th class="pb-4 text-right">ACTIONS</th>
+                            </tr>
+                        </thead>
+                        <tbody id="slabsTableBody" class="divide-y divide-gray-50 text-gray-700 font-medium"></tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- MODAL: ADD SLAB -->
+    <div id="addSlabModal" class="fixed inset-0 bg-gray-900 bg-opacity-60 z-50 hidden flex items-center justify-center p-4 transition-opacity">
+        <div class="bg-white rounded-3xl w-full max-w-md p-8 shadow-2xl relative">
+            <button onclick="closeModal('addSlabModal')" class="absolute top-6 right-6 text-gray-400 hover:text-gray-700">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+            <h3 class="text-xl font-bold text-gray-900 mb-6">Add Investment Task</h3>
+            <form id="addSlabForm" class="space-y-5">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Investment Amount (INR)</label>
+                    <input type="number" id="inputSlabAmount" required placeholder="e.g. 550" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:border-blue-600">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Daily Income (%)</label>
+                    <input type="number" id="inputSlabPercent" required placeholder="e.g. 6" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:border-blue-600">
+                </div>
+                <div class="pt-4 flex flex-col gap-3">
+                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm py-3.5 rounded-xl transition shadow-md">Create Task</button>
+                    <button type="button" onclick="closeModal('addSlabModal')" class="w-full text-sm font-bold text-gray-500 hover:text-gray-800 py-2">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: REJECT REASON (NEW) -->
+    <div id="rejectModal" class="fixed inset-0 bg-gray-900 bg-opacity-60 z-50 hidden flex items-center justify-center p-4 transition-opacity">
+        <div class="bg-white rounded-2xl w-full max-w-md p-6 md:p-8 shadow-2xl relative">
+            <button onclick="closeModal('rejectModal')" class="absolute top-6 right-6 text-gray-400 hover:text-gray-700"><i class="fa-solid fa-xmark text-lg"></i></button>
+            <h3 class="text-lg font-bold text-gray-900 mb-4">Reject Purchase</h3>
+            
+            <div class="bg-red-50 text-red-600 p-4 rounded-xl text-xs font-medium mb-5 border border-red-100 flex gap-3 items-start">
+                <i class="fa-solid fa-triangle-exclamation text-lg mt-0.5"></i>
+                <div>
+                    <p class="font-bold text-sm mb-1">This action cannot be undone</p>
+                    <p>Please provide a clear reason for rejection. This will be shown to the user.</p>
+                </div>
+            </div>
+
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Rejection Reason</label>
+            <textarea id="rejectReasonInput" rows="3" class="w-full p-4 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-red-500 bg-gray-50 mb-6 shadow-sm" placeholder="e.g. Invalid UTR, Fake payment proof, Amount mismatch..."></textarea>
+            
+            <div class="flex gap-3">
+                <button onclick="closeModal('rejectModal')" class="flex-1 px-4 py-3.5 border border-gray-200 text-sm font-bold text-gray-600 rounded-xl hover:bg-gray-50 transition">Cancel</button>
+                <button onclick="confirmReject()" id="btnConfirmReject" class="flex-1 bg-gray-600 hover:bg-gray-700 text-white font-bold text-sm px-4 py-3.5 rounded-xl transition flex items-center justify-center gap-2 shadow-md">
+                    <i class="fa-solid fa-ban"></i> Confirm Reject
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: VIEW PAYMENT PROOF -->
+    <div id="proofModal" class="fixed inset-0 bg-gray-900 bg-opacity-80 z-50 hidden flex items-center justify-center p-4 transition-opacity">
+        <div class="bg-white rounded-2xl w-full max-w-2xl overflow-hidden relative shadow-2xl">
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white">
+                <h3 class="text-lg font-bold text-gray-900">Payment Proof</h3>
+                <button onclick="closeModal('proofModal')" class="text-gray-400 hover:text-gray-700"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            <div class="p-6 bg-gray-50 flex justify-center items-center min-h-[300px]">
+                <img id="proofImageElement" src="" alt="Payment Proof" class="max-h-[70vh] object-contain rounded-lg shadow-sm border border-gray-200">
+                <p id="noProofText" class="hidden text-gray-400 font-medium">No proof image uploaded.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- UI Scripts -->
+    <script>
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('-translate-x-full');
+            document.getElementById('sidebarOverlay').classList.toggle('hidden');
+        }
+        function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+        window.currentFilterTab = 'All';
+        function filterDeposits(type) {
+            window.currentFilterTab = type;
+            const tabs = ['All', 'INR', 'USDT'];
+            tabs.forEach(t => {
+                const el = document.getElementById(`tab${t}`);
+                if(t === type) el.className = "flex-1 md:flex-none px-6 py-2 rounded-lg text-sm font-bold bg-white text-blue-600 shadow-sm transition";
+                else el.className = "flex-1 md:flex-none px-6 py-2 rounded-lg text-sm font-bold text-gray-500 hover:text-gray-900 transition";
+            });
+            if(window.renderDepositsTable) window.renderDepositsTable();
+        }
+    </script>
+
+    <!-- FIREBASE LOGIC -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, onSnapshot, query, orderBy, doc, updateDoc, addDoc, deleteDoc, increment, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCHoR7wojkpTZZPR-gcfDnPW8aOTuoiaAU",
+            authDomain: "nexapay-342d0.firebaseapp.com",
+            databaseURL: "https://nexapay-342d0-default-rtdb.firebaseio.com",
+            projectId: "nexapay-342d0",
+            storageBucket: "nexapay-342d0.firebasestorage.app",
+            messagingSenderId: "305096071099",
+            appId: "1:305096071099:web:3db1e75a2669adbcae569e"
+        };
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        let allDeposits = [];
+        let allTasksSlabs = []; 
+
+        // --- 1. FETCH LIVE SLABS (TASKS) ---
+        const qTasks = query(collection(db, "tasks"), orderBy("amount", "asc"));
+        onSnapshot(qTasks, (snapshot) => {
+            const tbody = document.getElementById('slabsTableBody');
+            if(tbody) tbody.innerHTML = '';
+            allTasksSlabs = []; 
+
+            if (snapshot.empty && tbody) {
+                tbody.innerHTML = '<tr><td colspan="4" class="p-6 text-center text-gray-400 text-sm">No investment slabs found.</td></tr>';
+                return;
+            }
+
+            snapshot.forEach((docSnap) => {
+                const data = { id: docSnap.id, ...docSnap.data() };
+                allTasksSlabs.push(data); 
+                
+                if(tbody) {
+                    tbody.innerHTML += `
+                        <tr class="hover:bg-gray-50 transition border-b border-gray-50">
+                            <td class="py-4 font-black text-gray-900">₹ ${data.amount}</td>
+                            <td class="py-4 font-bold text-green-500">${data.percent}%</td>
+                            <td class="py-4 font-black text-blue-600">+₹ ${parseFloat(data.quotaReward || (data.amount + (data.amount * data.percent / 100))).toFixed(0)}</td>
+                            <td class="py-4 text-right">
+                                <button onclick="window.deleteSlab('${data.id}')" class="text-red-400 hover:text-red-600 p-2 rounded-lg"><i class="fa-regular fa-trash-can text-lg"></i></button>
+                            </td>
+                        </tr>
+                    `;
+                }
+            });
+        });
+
+        // Add Slab
+        document.getElementById('addSlabForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = e.target.querySelector('button[type="submit"]');
+            btn.innerHTML = 'Processing...'; btn.disabled = true;
+
+            const amt = Number(document.getElementById('inputSlabAmount').value);
+            const percent = Number(document.getElementById('inputSlabPercent').value);
+            const reward = amt + (amt * percent / 100);
+
+            try {
+                await addDoc(collection(db, "tasks"), { amount: amt, percent: percent, quotaReward: reward, createdAt: new Date().toISOString() });
+                closeModal('addSlabModal'); e.target.reset();
+            } catch (err) { alert(err.message); } finally { btn.innerHTML = 'Create Task'; btn.disabled = false; }
+        });
+        window.deleteSlab = async function(id) { if(confirm("Delete slab?")) await deleteDoc(doc(db, "tasks", id)); };
+
+
+        // --- 2. FETCH LIVE DEPOSITS ---
+        const qDeposits = query(collection(db, "deposits"), orderBy("createdAt", "desc"));
+        onSnapshot(qDeposits, (snapshot) => {
+            allDeposits = [];
+            let pendingInr = 0, pendingUsdt = 0, approvedToday = 0, rejectedCount = 0, totalProcessed = 0;
+
+            snapshot.forEach((docSnap) => {
+                const data = { id: docSnap.id, ...docSnap.data() };
+                allDeposits.push(data);
+
+                if (data.status === 'Pending') {
+                    if (data.type === 'INR') pendingInr++;
+                    if (data.type === 'USDT') pendingUsdt++;
+                } else {
+                    totalProcessed++;
+                    if (data.status === 'Approved' || data.status === 'Success') approvedToday++;
+                    if (data.status === 'Rejected') rejectedCount++;
+                }
+            });
+
+            document.getElementById('livePendingInr').innerText = pendingInr;
+            document.getElementById('livePendingUsdt').innerText = pendingUsdt;
+            document.getElementById('liveVerifiedToday').innerText = approvedToday;
+            document.getElementById('liveRejectionRate').innerText = totalProcessed > 0 ? `${((rejectedCount / totalProcessed) * 100).toFixed(1)}%` : "0.0%";
+
+            window.renderDepositsTable();
+        });
+
+        document.getElementById('searchInput').addEventListener('input', () => { window.renderDepositsTable(); });
+
+        window.renderDepositsTable = function() {
+            const tableBody = document.getElementById('depositsTableBody');
+            const searchQ = document.getElementById('searchInput').value.toLowerCase();
+            if(!tableBody) return;
+            tableBody.innerHTML = '';
+
+            let filtered = allDeposits.filter(d => {
+                const matchType = window.currentFilterTab === 'All' ? true : d.type === window.currentFilterTab;
+                const matchSearch = (d.userId || '').toLowerCase().includes(searchQ) || (d.utr || d.txid || '').toLowerCase().includes(searchQ);
+                return matchType && matchSearch;
+            });
+
+            if (filtered.length === 0) { tableBody.innerHTML = '<tr><td colspan="5" class="p-8 text-center text-gray-400">No deposit requests found.</td></tr>'; return; }
+
+            filtered.forEach(d => {
+                let displayAmountHtml = '';
+                let displayWalletAddHtml = '';
+                
+                // 🚨 CONDITIONAL MAPPING FOR USDT / INR UI RENDERING 🚨
+                if(d.type === 'USDT') {
+                    const usdtAmt = parseFloat(d.amount || 0);
+                    const baseInrVal = parseFloat(d.baseInr || 0);
+                    const totalInrVal = parseFloat(d.totalInr || 0);
+                    
+                    displayAmountHtml = `<div class="font-black text-gray-900 text-sm">Deposit: ${usdtAmt} USDT (₹${baseInrVal.toFixed(2)})</div>`;
+                    displayWalletAddHtml = `<div class="text-[11px] font-bold text-green-600 mt-1">Wallet Add: ₹${totalInrVal.toFixed(2)}</div>`;
+                } else {
+                    const baseAmount = parseFloat(d.amount || 0);
+                    let finalReturn = baseAmount;
+                    const matchedSlab = allTasksSlabs.find(t => parseFloat(t.amount) === baseAmount);
+                    if(matchedSlab) {
+                        finalReturn = parseFloat(matchedSlab.quotaReward || (baseAmount + (baseAmount * matchedSlab.percent / 100)));
+                    }
+                    displayAmountHtml = `<div class="font-black text-gray-900 text-sm">Deposit: ₹${baseAmount}</div>`;
+                    displayWalletAddHtml = `<div class="text-[11px] font-bold text-green-600 mt-1">Wallet Add: ₹${finalReturn.toFixed(0)}</div>`;
+                }
+
+                let statusPill = d.status === 'Pending' ? `<span class="bg-amber-100 text-amber-700 px-2.5 py-0.5 rounded font-bold text-[10px] uppercase">Pending</span>` : 
+                               (d.status === 'Approved' || d.status === 'Success' ? `<span class="bg-green-100 text-green-700 px-2.5 py-0.5 rounded font-bold text-[10px] uppercase">Approved</span>` : 
+                               `<span class="bg-red-100 text-red-700 px-2.5 py-0.5 rounded font-bold text-[10px] uppercase">${d.status}</span>`);
+
+                let actionHtml = '';
+                if (d.status === 'Pending') {
+                    // Mapping exact dynamic target references safely into string injection params
+                    const depositStringObjId = d.id;
+                    const userStringObjId = d.userId;
+                    
+                    actionHtml = `
+                        <div class="flex items-center justify-center gap-2">
+                            <button onclick="window.approveDeposit('${depositStringObjId}', '${userStringObjId}')" class="bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 rounded-lg text-[11px] font-bold uppercase transition"><i class="fa-solid fa-check mr-1"></i> Approve</button>
+                            <button onclick="window.openRejectModal('${depositStringObjId}')" class="border border-red-200 text-red-500 hover:bg-red-50 px-3 py-1.5 rounded-lg text-[11px] font-bold uppercase transition"><i class="fa-solid fa-xmark mr-1"></i> Reject</button>
+                        </div>
+                    `;
+                } else {
+                    const isApp = d.status === 'Approved' || d.status === 'Success';
+                    actionHtml = `<span class="${isApp ? 'text-green-500' : 'text-red-500'} font-black text-xs uppercase">${isApp ? 'Approved' : 'Rejected'}</span>`;
+                }
+
+                tableBody.innerHTML += `
+                    <tr class="hover:bg-gray-50/50 border-b border-gray-50">
+                        <td class="px-6 py-4">
+                            <div class="font-bold text-gray-900 text-sm mb-1">UID: ${d.userId || '---'} <span class="ml-1 bg-blue-100 text-blue-800 text-[9px] font-black px-1.5 py-0.5 rounded">${d.type}</span> ${statusPill}</div>
+                            <div class="text-[11px] text-gray-400 font-medium"><i class="fa-regular fa-clock"></i> ${d.createdAt || 'N/A'}</div>
+                        </td>
+                        <td class="px-6 py-4">
+                            ${displayAmountHtml}
+                            ${displayWalletAddHtml}
+                            ${d.remark ? `<div class="text-[10px] text-red-500 mt-1 font-bold">Reason: ${d.remark}</div>` : ''}
+                        </td>
+                        <td class="px-6 py-4 font-mono font-bold text-gray-600 text-xs">${d.utr || d.txid || 'N/A'}</td>
+                        <td class="px-6 py-4 text-center">
+                            <button onclick="window.openProof('${d.proofImage || ''}')" class="border border-gray-200 text-gray-600 px-4 py-2 rounded-xl text-xs font-bold transition mx-auto shadow-sm"><i class="fa-solid fa-eye"></i> View Proof</button>
+                        </td>
+                        <td class="px-6 py-4 text-center">${actionHtml}</td>
+                    </tr>
+                `;
+            });
+        };
+
+        // --- 3. COMMISSION DISTRIBUTION LOGIC (TEAM MLM) ---
+        async function distributeTeamCommission(userId, depositAmount) {
+            try {
+                const masterSnap = await getDoc(doc(db, "system_settings", "master_config"));
+                let lvl1Pct = 10, lvl2Pct = 5, lvl3Pct = 2; 
+                if(masterSnap.exists()) {
+                    const mData = masterSnap.data();
+                    if(mData.level1Comm) lvl1Pct = parseFloat(mData.level1Comm);
+                    if(mData.level2Comm) lvl2Pct = parseFloat(mData.level2Comm);
+                    if(mData.level3Comm) lvl3Pct = parseFloat(mData.level3Comm);
+                }
+
+                const userSnap = await getDoc(doc(db, "users", userId));
+                if(!userSnap.exists()) return;
+                const parent1Id = userSnap.data().referredBy;
+                if(!parent1Id) return;
+
+                const comm1 = (depositAmount * lvl1Pct) / 100;
+                await updateDoc(doc(db, "users", parent1Id), { balance: increment(comm1), teamIncome: increment(comm1) });
+
+                const p1Snap = await getDoc(doc(db, "users", parent1Id));
+                if(!p1Snap.exists()) return;
+                const parent2Id = p1Snap.data().referredBy;
+                if(!parent2Id) return;
+
+                const comm2 = (depositAmount * lvl2Pct) / 100;
+                await updateDoc(doc(db, "users", parent2Id), { balance: increment(comm2), teamIncome: increment(comm2) });
+
+                const p2Snap = await getDoc(doc(db, "users", parent2Id));
+                if(!p2Snap.exists()) return;
+                const parent3Id = p2Snap.data().referredBy;
+                if(!parent3Id) return;
+
+                const comm3 = (depositAmount * lvl3Pct) / 100;
+                await updateDoc(doc(db, "users", parent3Id), { balance: increment(comm3), teamIncome: increment(comm3) });
+
+            } catch(err) {
+                console.error("Commission Distribution Failed:", err);
+            }
+        }
+
+        // --- 4. APPROVAL & REJECTION ACTIONS (DYNAMIC POP-UP IMPLEMENTED) ---
+        window.approveDeposit = async function(id, userId) {
+            // Find explicit runtime document context from structural array state
+            const targetDepositDoc = allDeposits.find(item => item.id === id);
+            if(!targetDepositDoc) return;
+
+            let confirmAlertMessageText = '';
+            let finalWalletCreditPoolValue = 0;
+            let topupBonusPoolValue = 0;
+            let baseRechargeVolumeTrack = 0;
+
+            // 🚨 CONDITIONING THE TEXT FORMAT EXACTLY AS REQUESTED 🚨
+            if(targetDepositDoc.type === 'USDT') {
+                const totalUsdtInput = parseFloat(targetDepositDoc.amount || 0);
+                baseRechargeVolumeTrack = parseFloat(targetDepositDoc.baseInr || 0);
+                topupBonusPoolValue = parseFloat(targetDepositDoc.bonusInr || 0);
+                finalWalletCreditPoolValue = parseFloat(targetDepositDoc.totalInr || 0);
+                const appliedPct = targetDepositDoc.bonusPercent || 0;
+
+                confirmAlertMessageText = `Confirm APPROVAL?\nBase Deposit: ${totalUsdtInput} USDT (₹${baseRechargeVolumeTrack.toFixed(2)})\nBonus Added (${appliedPct}%): ₹${topupBonusPoolValue.toFixed(2)}\nTotal Wallet Credited (with Income): ₹${finalWalletCreditPoolValue.toFixed(2)}`;
+            } else {
+                baseRechargeVolumeTrack = parseFloat(targetDepositDoc.amount || 0);
+                finalWalletCreditPoolValue = baseRechargeVolumeTrack;
+                
+                const matchedSlab = allTasksSlabs.find(t => parseFloat(t.amount) === baseRechargeVolumeTrack);
+                if(matchedSlab) {
+                    finalWalletCreditPoolValue = parseFloat(matchedSlab.quotaReward || (baseRechargeVolumeTrack + (baseRechargeVolumeTrack * matchedSlab.percent / 100)));
+                }
+                
+                confirmAlertMessageText = `Confirm APPROVAL?\nBase Deposit: ₹${baseRechargeVolumeTrack}\nWallet Credited (with Income): ₹${finalWalletCreditPoolValue.toFixed(0)}`;
+            }
+
+            if(confirm(confirmAlertMessageText)) {
+                try {
+                    // 1. Update target deposit record history context
+                    await updateDoc(doc(db, "deposits", id), { 
+                        status: 'Approved', 
+                        finalCredited: finalWalletCreditPoolValue,
+                        approvedAt: new Date().toLocaleString('en-IN')
+                    });
+                    
+                    // 2. Sync all home page nodes, transaction logs counters inside users document
+                    const userRef = doc(db, "users", userId);
+                    await updateDoc(userRef, {
+                        balance: increment(finalWalletCreditPoolValue),      // Total Balance Addition
+                        topupBonus: increment(topupBonusPoolValue),        // Home Screen Topup Bonus Display Box
+                        recharge: increment(baseRechargeVolumeTrack),       // Today Received Base Recharge tracking 
+                        todayDep: increment(baseRechargeVolumeTrack)        // History track log token
+                    });
+
+                    // 3. Distribute MLM Commission (Strictly on real base INR conversion amount)
+                    await distributeTeamCommission(userId, baseRechargeVolumeTrack);
+                    
+                    alert("Deposit approved! Balances, Topup Bonus box, and Team Commissions synchronized successfully.");
+                } catch (err) { alert("Error: " + err.message); }
+            }
+        };
+
+        // Reject Flow Logic
+        let activeRejectDepositId = null;
+        window.openRejectModal = function(id) {
+            activeRejectDepositId = id;
+            document.getElementById('rejectReasonInput').value = '';
+            openModal('rejectModal');
+        };
+
+        window.confirmReject = async function() {
+            const reason = document.getElementById('rejectReasonInput').value.trim();
+            if(!reason) return alert("Please provide a rejection reason.");
+
+            const btn = document.getElementById('btnConfirmReject');
+            btn.innerHTML = 'Processing...'; btn.disabled = true;
+
+            try {
+                await updateDoc(doc(db, "deposits", activeRejectDepositId), { 
+                    status: 'Rejected',
+                    remark: reason 
+                });
+                closeModal('rejectModal');
+                alert("Deposit Rejected successfully.");
+            } catch (err) { alert("Error: " + err.message); } 
+            finally { btn.innerHTML = '<i class="fa-solid fa-ban"></i> Confirm Reject'; btn.disabled = false; }
+        };
+
+        window.openProof = function(url) {
+            const img = document.getElementById('proofImageElement');
+            const noText = document.getElementById('noProofText');
+            if(url) { img.src = url; img.classList.remove('hidden'); noText.classList.add('hidden'); } 
+            else { img.src = ''; img.classList.add('hidden'); noText.classList.remove('hidden'); }
+            openModal('proofModal');
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexaPay Admin - Gateway Settings</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #F8F9FA; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .sidebar-transition { transition: transform 0.3s ease-in-out; }
+        
+        /* Custom Toggle Switch CSS */
+        .toggle-checkbox:checked { right: 0; border-color: #2563EB; }
+        .toggle-checkbox:checked + .toggle-label { background-color: #2563EB; }
+    </style>
+
+    <script>
+        if (localStorage.getItem('nexaAdminAuth') !== 'true') {
+            window.location.href = 'index.html'; 
+        }
+        function adminLogout() {
+            if(confirm("Are you sure you want to log out from NexaPay Admin?")) {
+                localStorage.removeItem('nexaAdminAuth');
+                window.location.href = 'index.html';
+            }
+        }
+    </script>
+</head>
+<body class="text-gray-800 antialiased">
+
+    <div id="sidebarOverlay" class="fixed inset-0 bg-gray-900 bg-opacity-40 z-40 hidden" onclick="toggleSidebar()"></div>
+
+    <aside id="sidebar" class="w-[280px] bg-white border-r border-gray-100 flex flex-col justify-between h-screen fixed left-0 top-0 z-50 transform -translate-x-full md:translate-x-0 sidebar-transition">
+        <div class="flex-1 overflow-y-auto no-scrollbar">
+            <div class="px-6 py-6 flex items-center justify-between">
+                <span class="text-[22px] font-extrabold text-blue-600 tracking-tight">NexaPay</span>
+                <button onclick="toggleSidebar()" class="md:hidden text-gray-500"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            
+            <nav class="mt-2 px-4 space-y-1.5">
+                <a href="dashboard.html" class="flex items-center gap-4 px-4 py-3 text-gray-500 hover:bg-gray-50 hover:text-gray-900 rounded-xl font-medium text-sm transition">
+                    <i class="fa-solid fa-border-all w-5 text-center"></i> Dashboard
+                </a>
+                <a href="deposit.html" class="flex items-center gap-4 px-4 py-3 text-gray-500 hover:bg-gray-50 hover:text-gray-900 rounded-xl font-medium text-sm transition">
+                    <i class="fa-solid fa-wallet w-5 text-center"></i> Deposits
+                </a>
+                <a href="gateway-settings.html" class="flex items-center gap-4 px-4 py-3 bg-blue-50 text-blue-600 rounded-xl font-bold text-sm">
+                    <i class="fa-solid fa-plug w-5 text-center"></i> Gateway Settings
+                </a>
+                <a href="user.html" class="flex items-center gap-4 px-4 py-3 text-gray-500 hover:bg-gray-50 hover:text-gray-900 rounded-xl font-medium text-sm transition">
+                    <i class="fa-solid fa-users w-5 text-center"></i> Users
+                </a>
+                <a href="payouts.html" class="flex items-center gap-4 px-4 py-3 text-gray-500 hover:bg-gray-50 hover:text-gray-900 rounded-xl font-medium text-sm transition">
+                    <i class="fa-solid fa-money-bill-wave w-5 text-center"></i> Payouts
+                </a>
+                <a href="team-commission.html" class="flex items-center gap-4 px-4 py-3 text-gray-500 hover:bg-gray-50 hover:text-gray-900 rounded-xl font-medium text-sm transition">
+                    <i class="fa-solid fa-network-wired w-5 text-center"></i> Team & Commission
+                </a>
+                <a href="reports.html" class="flex items-center gap-4 px-4 py-3 text-gray-500 hover:bg-gray-50 hover:text-gray-900 rounded-xl font-medium text-sm transition">
+                    <i class="fa-solid fa-chart-line w-5 text-center"></i> Reports
+                </a>
+                <a href="withdrawals.html" class="flex items-center gap-4 px-4 py-3 text-gray-500 hover:bg-gray-50 hover:text-gray-900 rounded-xl font-medium text-sm transition">
+                    <i class="fa-solid fa-building-columns w-5 text-center"></i> Withdrawals
+                </a>
+                <a href="master-settings.html" class="flex items-center gap-4 px-4 py-3 text-gray-500 hover:bg-gray-50 hover:text-gray-900 rounded-xl font-medium text-sm transition">
+                    <i class="fa-solid fa-gear w-5 text-center"></i> Master Settings
+                </a>
+            </nav>
+        </div>
+
+        <div class="p-5 border-t border-gray-100 flex items-center justify-between bg-white">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-blue-100 text-blue-600 font-black rounded-full flex items-center justify-center">A</div>
+                <div>
+                    <h4 class="text-sm font-bold text-gray-900">Super Admin</h4>
+                    <p class="text-[11px] text-gray-400 font-medium">admin@nexapay.com</p>
+                </div>
+            </div>
+            <button onclick="adminLogout()" class="text-gray-400 hover:text-red-500 p-2 rounded-lg transition" title="Logout">
+                <i class="fa-solid fa-right-from-bracket text-lg"></i>
+            </button>
+        </div>
+    </aside>
+
+    <main class="md:ml-[280px] min-h-screen pb-12">
+        
+        <header class="bg-white px-6 md:px-10 py-5 sticky top-0 z-30 border-b border-gray-100 flex justify-between items-center">
+            <div class="flex items-center gap-4">
+                <button onclick="toggleSidebar()" class="md:hidden text-gray-500 text-xl"><i class="fa-solid fa-bars"></i></button>
+                <h1 class="text-[20px] font-medium text-gray-800">Gateway Settings</h1>
+            </div>
+            <div class="flex items-center gap-1.5 px-3 py-1.5 bg-green-50 text-green-600 text-xs font-bold rounded-full border border-green-100">
+                <span class="w-2 h-2 rounded-full bg-green-500"></span> Active
+            </div>
+        </header>
+
+        <div class="p-4 md:p-8 max-w-[1000px] mx-auto space-y-8">
+
+            <div class="bg-white rounded-2xl shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-gray-100 p-6 md:p-8 relative">
+                <div class="flex items-center gap-3 mb-6">
+                    <i class="fa-solid fa-building-columns text-blue-600 text-xl"></i>
+                    <h2 class="text-sm font-bold text-blue-900 uppercase tracking-wider">INR Bank Details Setup</h2>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Bank Name</label>
+                        <div class="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm font-medium text-gray-500" id="dispBankName">Not available</div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Payee Name</label>
+                        <div class="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm font-medium text-gray-500" id="dispPayeeName">Not available</div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Account Number</label>
+                        <div class="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm font-medium text-gray-500" id="dispAccNumber">Not available</div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">IFSC Code</label>
+                        <div class="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm font-medium text-gray-500" id="dispIfscCode">Not available</div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">UPI Holder Name</label>
+                        <div class="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm font-medium text-gray-500" id="dispUpiName">Not available</div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">UPI ID</label>
+                        <div class="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm font-medium text-gray-500" id="dispUpiId">Not available</div>
+                    </div>
+                </div>
+
+                <div class="mt-8 flex justify-end">
+                    <button onclick="openModal('editBankModal')" class="bg-gray-800 hover:bg-gray-900 text-white font-bold text-sm px-6 py-3 rounded-xl transition shadow-md flex items-center gap-2">
+                        <i class="fa-solid fa-pen-to-square"></i> Edit Details
+                    </button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="bg-white rounded-2xl shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-gray-100 p-6 md:p-8">
+                    <div class="flex items-center gap-3 mb-6">
+                        <i class="fa-solid fa-wallet text-blue-600 text-xl"></i>
+                        <h2 class="text-sm font-bold text-blue-900 uppercase tracking-wider">USDT Wallet Setup</h2>
+                    </div>
+
+                    <div class="space-y-6">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Wallet Address (TRC20)</label>
+                            <div class="relative">
+                                <input type="text" id="usdtWalletInput" placeholder="Enter TRC20 Address" class="w-full pr-12 pl-4 py-3 border border-gray-200 rounded-xl text-sm font-medium focus:outline-none focus:border-blue-600">
+                                <button onclick="copyToClipboard('usdtWalletInput')" class="absolute right-3 top-3 text-gray-400 hover:text-gray-700"><i class="fa-regular fa-copy text-lg"></i></button>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">QR Code Upload</label>
+                            <div class="flex items-center gap-4">
+                                <label for="usdtQrUpload" class="cursor-pointer bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 font-semibold py-2.5 px-5 rounded-xl text-sm transition shadow-sm flex items-center gap-2">
+                                    <i class="fa-solid fa-arrow-up-from-bracket"></i> Upload QR
+                                </label>
+                                <input type="file" id="usdtQrUpload" accept="image/*" class="hidden" onchange="previewImage(this, 'usdtQrPreview')">
+                                <span class="text-xs text-gray-400">Max size 2MB, PNG/JPG</span>
+                            </div>
+                        </div>
+
+                        <div class="border border-dashed border-gray-200 rounded-2xl p-6 flex flex-col items-center justify-center bg-gray-50 relative min-h-[200px]">
+                            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest absolute top-4">Current QR Preview</span>
+                            <img id="usdtQrPreview" src="" class="hidden max-w-[150px] max-h-[150px] mt-4 rounded-lg shadow-sm">
+                            <i id="usdtQrPlaceholder" class="fa-solid fa-qrcode text-5xl text-gray-300 mt-4"></i>
+                        </div>
+
+                        <button id="btnUpdateCrypto" onclick="saveUsdtDetails()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm py-3.5 rounded-xl transition shadow-md flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-arrows-rotate"></i> Update Crypto Details
+                        </button>
+                    </div>
+                </div>
+
+                <div class="space-y-8">
+                    <div class="bg-white rounded-2xl shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-gray-100 p-6 md:p-8">
+                        <div class="flex items-center gap-3 mb-4">
+                            <i class="fa-solid fa-qrcode text-blue-600 text-xl"></i>
+                            <h2 class="text-sm font-bold text-blue-900 uppercase tracking-wider">INR Task Purchase QR Setup</h2>
+                        </div>
+                        <p class="text-xs text-gray-500 mb-6 leading-relaxed">This QR will be shown to users when they purchase a task via manual INR payment.</p>
+
+                        <div class="space-y-6">
+                            <div class="flex items-center gap-4">
+                                <label for="inrQrUpload" class="cursor-pointer bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 font-semibold py-2.5 px-5 rounded-xl text-sm transition shadow-sm flex items-center gap-2">
+                                    <i class="fa-solid fa-arrow-up-from-bracket"></i> Upload QR
+                                </label>
+                                <input type="file" id="inrQrUpload" accept="image/*" class="hidden" onchange="previewImage(this, 'inrQrPreview')">
+                                <span class="text-xs text-gray-400">Max size 2MB, PNG/JPG</span>
+                            </div>
+
+                            <div class="border border-dashed border-gray-200 rounded-2xl p-6 flex flex-col items-center justify-center bg-gray-50 relative min-h-[200px]">
+                                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest absolute top-4">Current QR Preview</span>
+                                <img id="inrQrPreview" src="" class="hidden max-w-[150px] max-h-[150px] mt-4 rounded-lg shadow-sm">
+                                <i id="inrQrPlaceholder" class="fa-solid fa-qrcode text-5xl text-gray-300 mt-4"></i>
+                            </div>
+
+                            <button id="btnSaveInrQr" onclick="saveInrQrDetails()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm py-3.5 rounded-xl transition shadow-md">
+                                Save INR QR
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-2xl shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-gray-100 p-6 md:p-8">
+                        <div class="flex items-center gap-3 mb-6">
+                            <i class="fa-solid fa-toggle-on text-blue-600 text-xl"></i>
+                            <h2 class="text-sm font-bold text-blue-900 uppercase tracking-wider">Gateway Control Switches</h2>
+                        </div>
+
+                        <div class="space-y-6">
+                            <div class="flex items-center justify-between">
+                                <div class="pr-4">
+                                    <h4 class="text-sm font-bold text-gray-800">Manual Payment</h4>
+                                    <p class="text-xs text-gray-400 mt-1">Enable users to pay manually via Bank/UPI/QR proofs</p>
+                                </div>
+                                <label class="flex items-center cursor-pointer">
+                                    <div class="relative">
+                                        <input type="checkbox" id="toggleManual" class="sr-only" onchange="updateGatewayStatus('manual', this.checked)">
+                                        <div class="block bg-gray-200 w-14 h-8 rounded-full transition-colors duration-300" id="bgToggleManual"></div>
+                                        <div class="dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition-transform duration-300 shadow-sm" id="dotToggleManual"></div>
+                                    </div>
+                                </label>
+                            </div>
+                            <hr class="border-gray-100">
+                            <div class="flex items-center justify-between">
+                                <div class="pr-4">
+                                    <h4 class="text-sm font-bold text-gray-800">Fast Payment</h4>
+                                    <p class="text-xs text-gray-400 mt-1">Enable automated payment gateway (Divine Pay/Auto API)</p>
+                                </div>
+                                <label class="flex items-center cursor-pointer">
+                                    <div class="relative">
+                                        <input type="checkbox" id="toggleFast" class="sr-only" onchange="updateGatewayStatus('fast', this.checked)">
+                                        <div class="block bg-gray-200 w-14 h-8 rounded-full transition-colors duration-300" id="bgToggleFast"></div>
+                                        <div class="dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition-transform duration-300 shadow-sm" id="dotToggleFast"></div>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <div id="editBankModal" class="fixed inset-0 bg-gray-900 bg-opacity-60 z-50 hidden flex items-center justify-center p-4 transition-opacity">
+        <div class="bg-white rounded-3xl w-full max-w-2xl p-6 md:p-8 shadow-2xl relative max-h-[90vh] overflow-y-auto no-scrollbar">
+            <button onclick="closeModal('editBankModal')" class="absolute top-6 right-6 text-gray-400 hover:text-gray-700">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+            <h3 class="text-xl font-bold text-gray-900 mb-6">Edit INR Bank Details</h3>
+            
+            <form id="editBankForm" class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1.5">Bank Name</label>
+                    <input type="text" id="inputBankName" class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-blue-600">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1.5">Payee Name</label>
+                    <input type="text" id="inputPayeeName" class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-blue-600">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1.5">Account Number</label>
+                    <input type="text" id="inputAccNumber" class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-blue-600">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1.5">IFSC Code</label>
+                    <input type="text" id="inputIfscCode" class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-blue-600">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1.5">UPI Holder Name</label>
+                    <input type="text" id="inputUpiName" class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-blue-600">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1.5">UPI ID</label>
+                    <input type="text" id="inputUpiId" class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-blue-600">
+                </div>
+
+                <div class="col-span-1 md:col-span-2 flex justify-end gap-3 mt-4 pt-4 border-t border-gray-100">
+                    <button type="button" onclick="closeModal('editBankModal')" class="px-6 py-3 text-sm font-bold text-gray-500 hover:text-gray-800 transition">Cancel</button>
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm px-8 py-3 rounded-xl transition shadow-md">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('-translate-x-full');
+            document.getElementById('sidebarOverlay').classList.toggle('hidden');
+        }
+        function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+        function copyToClipboard(inputId) {
+            const input = document.getElementById(inputId);
+            input.select();
+            document.execCommand("copy");
+            alert("Copied: " + input.value);
+        }
+
+        // Image Preview Logic
+        window.previewImage = function(input, previewId) {
+            const file = input.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = document.getElementById(previewId);
+                    img.src = e.target.result;
+                    img.classList.remove('hidden');
+                    
+                    if(previewId === 'usdtQrPreview') document.getElementById('usdtQrPlaceholder').classList.add('hidden');
+                    if(previewId === 'inrQrPreview') document.getElementById('inrQrPlaceholder').classList.add('hidden');
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // Custom UI for Toggles
+        window.styleToggle = function(id, isChecked) {
+            const bg = document.getElementById('bgToggle' + id);
+            const dot = document.getElementById('dotToggle' + id);
+            if(!bg || !dot) return;
+            if(isChecked) {
+                bg.className = "block bg-blue-600 w-14 h-8 rounded-full transition-colors duration-300";
+                dot.style.transform = 'translateX(100%)';
+            } else {
+                bg.className = "block bg-gray-200 w-14 h-8 rounded-full transition-colors duration-300";
+                dot.style.transform = 'translateX(0)';
+            }
+        }
+    </script>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, doc, onSnapshot, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // APP KI REAL FIREBASE CONFIGURATION
+        const firebaseConfig = {
+            apiKey: "AIzaSyCHoR7wojkpTZZPR-gcfDnPW8aOTuoiaAU",
+            authDomain: "nexapay-342d0.firebaseapp.com",
+            databaseURL: "https://nexapay-342d0-default-rtdb.firebaseio.com",
+            projectId: "nexapay-342d0",
+            storageBucket: "nexapay-342d0.firebasestorage.app",
+            messagingSenderId: "305096071099",
+            appId: "1:305096071099:web:3db1e75a2669adbcae569e"
+        };
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        const settingsDocRef = doc(db, "system_settings", "gateway_config");
+
+        // 1. Fetch Live Settings to populate UI globally
+        onSnapshot(settingsDocRef, (docSnap) => {
+            if(docSnap.exists()) {
+                const data = docSnap.data();
+                
+                // Populate INR Bank Details Text
+                document.getElementById('dispBankName').innerText = data.bankName || 'Not available';
+                document.getElementById('dispPayeeName').innerText = data.payeeName || 'Not available';
+                document.getElementById('dispAccNumber').innerText = data.accountNumber || 'Not available';
+                document.getElementById('dispIfscCode').innerText = data.ifscCode || 'Not available';
+                document.getElementById('dispUpiName').innerText = data.upiName || 'Not available';
+                document.getElementById('dispUpiId').innerText = data.upiId || 'Not available';
+
+                // Populate Modal Inputs for editing
+                document.getElementById('inputBankName').value = data.bankName || '';
+                document.getElementById('inputPayeeName').value = data.payeeName || '';
+                document.getElementById('inputAccNumber').value = data.accountNumber || '';
+                document.getElementById('inputIfscCode').value = data.ifscCode || '';
+                document.getElementById('inputUpiName').value = data.upiName || '';
+                document.getElementById('inputUpiId').value = data.upiId || '';
+
+                // Populate USDT Wallet Address
+                if(data.usdtWallet) document.getElementById('usdtWalletInput').value = data.usdtWallet;
+                
+                // Populate USDT QR Code Preview
+                if(data.usdtQrBase64) {
+                    document.getElementById('usdtQrPreview').src = data.usdtQrBase64;
+                    document.getElementById('usdtQrPreview').classList.remove('hidden');
+                    document.getElementById('usdtQrPlaceholder').classList.add('hidden');
+                }
+
+                // Populate INR Task Purchase QR Preview
+                if(data.usdtQrBase64 || data.inrQrBase64) {
+                    document.getElementById('inrQrPreview').src = data.inrQrBase64 || data.usdtQrBase64;
+                    document.getElementById('inrQrPreview').classList.remove('hidden');
+                    document.getElementById('inrQrPlaceholder').classList.add('hidden');
+                }
+
+                // Sync Control Switch States
+                const isManual = data.manualPaymentEnabled !== false;
+                const isFast = data.fastPaymentEnabled !== false;
+                
+                document.getElementById('toggleManual').checked = isManual;
+                document.getElementById('toggleFast').checked = isFast;
+                
+                window.styleToggle('Manual', isManual);
+                window.styleToggle('Fast', isFast);
+
+            } else {
+                // Initialize default documents configuration if entry doesn't exist
+                setDoc(settingsDocRef, {
+                    manualPaymentEnabled: true,
+                    fastPaymentEnabled: true,
+                    bankName: "",
+                    payeeName: "",
+                    accountNumber: "",
+                    ifscCode: "",
+                    upiName: "",
+                    upiId: "",
+                    usdtWallet: ""
+                });
+            }
+        });
+
+        // 2. Save Bank Details Submission Action Handler
+        document.getElementById('editBankForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = e.target.querySelector('button[type="submit"]');
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
+            
+            try {
+                await updateDoc(settingsDocRef, {
+                    bankName: document.getElementById('inputBankName').value,
+                    payeeName: document.getElementById('inputPayeeName').value,
+                    accountNumber: document.getElementById('inputAccNumber').value,
+                    ifscCode: document.getElementById('inputIfscCode').value,
+                    upiName: document.getElementById('inputUpiName').value,
+                    upiId: document.getElementById('inputUpiId').value,
+                });
+                closeModal('editBankModal');
+            } catch (err) {
+                alert("Error updating bank credentials: " + err.message);
+            } finally {
+                btn.innerHTML = 'Save Changes';
+            }
+        });
+
+        // 3. Save USDT Wallet Routing and Details Form
+        window.saveUsdtDetails = async function() {
+            const btn = document.getElementById('btnUpdateCrypto');
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing...';
+            
+            const wallet = document.getElementById('usdtWalletInput').value;
+            const qrSrc = document.getElementById('usdtQrPreview').src;
+            const qrData = qrSrc.startsWith('data:image') ? qrSrc : null;
+
+            try {
+                await updateDoc(settingsDocRef, {
+                    usdtWallet: wallet,
+                    usdtQrBase64: qrData
+                });
+                alert("USDT wallet parameters sync finalized successfully!");
+            } catch (err) {
+                alert("Firebase Error: " + err.message);
+            } finally {
+                btn.innerHTML = '<i class="fa-solid fa-arrows-rotate"></i> Update Crypto Details';
+            }
+        };
+
+        // 4. Save INR Task Purchase QR Details Control Flow
+        window.saveInrQrDetails = async function() {
+            const btn = document.getElementById('btnSaveInrQr');
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing...';
+            
+            const qrSrc = document.getElementById('inrQrPreview').src;
+            const qrData = qrSrc.startsWith('data:image') ? qrSrc : null;
+
+            try {
+                await updateDoc(settingsDocRef, {
+                    inrQrBase64: qrData
+                });
+                alert("INR manual purchase QR configurations updated successfully!");
+            } catch (err) {
+                alert("Firebase Error: " + err.message);
+            } finally {
+                btn.innerHTML = 'Save INR QR';
+            }
+        };
+
+        // 5. Live Dashboard Switching Toggles Core Callback Routine
+        window.updateGatewayStatus = async function(type, isChecked) {
+            window.styleToggle(type === 'manual' ? 'Manual' : 'Fast', isChecked);
+
+            try {
+                if(type === 'manual') {
+                    await updateDoc(settingsDocRef, { manualPaymentEnabled: isChecked });
+                } else {
+                    await updateDoc(settingsDocRef, { fastPaymentEnabled: isChecked });
+                }
+            } catch (err) {
+                console.error("Failed to commit settings toggle transaction:", err);
+            }
+        };
+    </script>
+</body>
+</html>

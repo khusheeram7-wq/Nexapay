@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexaPay Admin - Payouts</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #F8F9FA; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .sidebar-transition { transition: transform 0.3s ease-in-out; }
+    </style>
+
+    <script>
+        if (localStorage.getItem('nexaAdminAuth') !== 'true') {
+            window.location.href = 'index.html'; 
+        }
+        function adminLogout() {
+            if(confirm("Are you sure you want to log out from NexaPay Admin?")) {
+                localStorage.removeItem('nexaAdminAuth');
+                window.location.href = 'index.html';
+            }
+        }
+    </script>
+</head>
+<body class="text-gray-800 antialiased">
+
+    <div id="sidebarOverlay" class="fixed inset-0 bg-gray-900 bg-opacity-40 z-40 hidden" onclick="toggleSidebar()"></div>
+
+    <aside id="sidebar" class="w-[280px] bg-white border-r border-gray-100 flex flex-col justify-between h-screen fixed left-0 top-0 z-50 transform -translate-x-full md:translate-x-0 sidebar-transition">
+        <div class="flex-1 overflow-y-auto no-scrollbar">
+            <div class="px-6 py-6 flex items-center justify-between">
+                <span class="text-[22px] font-extrabold text-blue-600 tracking-tight">NexaPay</span>
+                <button onclick="toggleSidebar()" class="md:hidden text-gray-500"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            
+            <nav class="mt-2 px-4 space-y-1.5">
+                <a href="dashboard.html" class="flex items-center gap-4 px-4 py-3 text-gray-500 hover:bg-gray-50 hover:text-gray-900 rounded-xl font-medium text-sm transition">
+                    <i class="fa-solid fa-border-all w-5 text-center"></i> Dashboard
+                </a>
+                <a href="deposit.html" class="flex items-center gap-4 px-4 py-3 text-gray-500 hover:bg-gray-50 hover:text-gray-900 rounded-xl font-medium text-sm transition">
+                    <i class="fa-solid fa-wallet w-5 text-center"></i> Deposits
+                </a>
+                <a href="gateway-settings.html" class="flex items-center gap-4 px-4 py-3 text-gray-500 hover:bg-gray-50 hover:text-gray-900 rounded-xl font-medium text-sm transition">
+                    <i class="fa-solid fa-plug w-5 text-center"></i> Gateway Settings
+                </a>
+                <a href="user.html" class="flex items-center gap-4 px-4 py-3 text-gray-500 hover:bg-gray-50 hover:text-gray-900 rounded-xl font-medium text-sm transition">
+                    <i class="fa-solid fa-users w-5 text-center"></i> Users
+                </a>
+                <a href="payouts.html" class="flex items-center gap-4 px-4 py-3 bg-blue-50 text-blue-600 rounded-xl font-bold text-sm transition">
+                    <i class="fa-solid fa-money-bill-wave w-5 text-center"></i> Payouts
+                </a>
+                <a href="team-commission.html" class="flex items-center gap-4 px-4 py-3 text-gray-500 hover:bg-gray-50 hover:text-gray-900 rounded-xl font-medium text-sm transition">
+                    <i class="fa-solid fa-network-wired w-5 text-center"></i> Team & Commission
+                </a>
+                <a href="reports.html" class="flex items-center gap-4 px-4 py-3 text-gray-500 hover:bg-gray-50 hover:text-gray-900 rounded-xl font-medium text-sm transition">
+                    <i class="fa-solid fa-chart-line w-5 text-center"></i> Reports
+                </a>
+                <a href="withdrawals.html" class="flex items-center gap-4 px-4 py-3 text-gray-500 hover:bg-gray-50 hover:text-gray-900 rounded-xl font-medium text-sm transition">
+                    <i class="fa-solid fa-building-columns w-5 text-center"></i> Withdrawals
+                </a>
+                <a href="master-settings.html" class="flex items-center gap-4 px-4 py-3 text-gray-500 hover:bg-gray-50 hover:text-gray-900 rounded-xl font-medium text-sm transition">
+                    <i class="fa-solid fa-gear w-5 text-center"></i> Master Settings
+                </a>
+            </nav>
+        </div>
+
+        <div class="p-5 border-t border-gray-100 flex items-center justify-between bg-white">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-blue-100 text-blue-600 font-black rounded-full flex items-center justify-center">A</div>
+                <div>
+                    <h4 class="text-sm font-bold text-gray-900">Super Admin</h4>
+                    <p class="text-[11px] text-gray-400 font-medium">admin@nexapay.com</p>
+                </div>
+            </div>
+            <button onclick="adminLogout()" class="text-gray-400 hover:text-red-500 p-2 rounded-lg transition" title="Logout">
+                <i class="fa-solid fa-right-from-bracket text-lg"></i>
+            </button>
+        </div>
+    </aside>
+
+    <main class="md:ml-[280px] min-h-screen pb-12">
+        <header class="bg-white px-6 md:px-10 py-5 sticky top-0 z-30 border-b border-gray-100 flex justify-between items-center">
+            <div class="flex items-center gap-4">
+                <button onclick="toggleSidebar()" class="md:hidden text-gray-500 text-xl"><i class="fa-solid fa-bars"></i></button>
+                <h1 class="text-[20px] font-medium text-gray-800">Payouts</h1>
+            </div>
+            <div class="flex items-center gap-1.5 px-3 py-1.5 bg-green-50 text-green-600 text-xs font-bold rounded-full border border-green-100">
+                <span class="w-2 h-2 rounded-full bg-green-500"></span> Active
+            </div>
+        </header>
+
+        <div class="p-4 md:p-8 max-w-[1200px] mx-auto space-y-6">
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-white p-6 rounded-2xl shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-gray-100">
+                    <div class="flex items-center gap-2 mb-4">
+                        <i class="fa-solid fa-magnifying-glass text-blue-500"></i>
+                        <h3 class="text-sm font-bold text-gray-800">Identify User</h3>
+                    </div>
+                    <form id="searchUserForm" class="flex gap-2 relative">
+                        <i class="fa-solid fa-magnifying-glass absolute left-4 top-3.5 text-gray-400 text-sm"></i>
+                        <input type="text" id="inputSearchUser" placeholder="Search User ID or Mobile" required class="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-blue-500 transition">
+                        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm px-6 py-2.5 rounded-xl transition shadow-sm">Search</button>
+                    </form>
+                </div>
+
+                <div id="userResultBox" class="bg-gray-50 p-6 rounded-2xl shadow-inner border border-gray-100 flex flex-col justify-center items-center text-gray-400">
+                    <p class="text-sm font-medium">Search for a user to view details</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 relative">
+                <div id="actionOverlay" class="absolute inset-0 bg-white/50 z-10 rounded-2xl backdrop-blur-[1px]"></div>
+
+                <div class="bg-white p-6 md:p-8 rounded-2xl shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-gray-100 relative">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center text-lg"><i class="fa-regular fa-paper-plane"></i></div>
+                        <div>
+                            <h3 class="text-base font-bold text-gray-900">Manual Payout</h3>
+                            <p class="text-xs text-gray-400 font-medium">Send money to linked UPI</p>
+                        </div>
+                    </div>
+
+                    <form id="payoutForm" class="space-y-5">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Select UPI Account</label>
+                            <div class="relative">
+                                <select id="payoutUpiSelect" class="w-full px-4 py-3.5 bg-gray-50 border border-blue-200 rounded-xl text-sm font-semibold text-blue-800 focus:outline-none focus:border-blue-500 appearance-none">
+                                    <option value="">No UPI Linked</option>
+                                </select>
+                                <i class="fa-regular fa-copy absolute right-4 top-4 text-blue-400 cursor-pointer hover:text-blue-600 transition"></i>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Payout Amount</label>
+                            <div class="relative">
+                                <span class="absolute left-4 top-3 text-gray-400 font-bold">₹</span>
+                                <input type="number" id="payoutAmount" placeholder="0.00" required class="w-full pl-8 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-semibold focus:outline-none focus:border-blue-500">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">UTR Reference</label>
+                            <input type="text" id="payoutUtr" placeholder="Enter transaction UTR number" required class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium focus:outline-none focus:border-blue-500">
+                        </div>
+
+                        <button type="submit" class="w-full bg-[#7C8EE0] hover:bg-blue-600 text-white font-bold text-sm py-3.5 rounded-xl transition shadow-md flex justify-center items-center gap-2 mt-4">
+                            <i class="fa-regular fa-circle-check"></i> Send Payout & Deduct
+                        </button>
+                    </form>
+                </div>
+
+                <div class="bg-white p-6 md:p-8 rounded-2xl shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-gray-100">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-10 h-10 bg-orange-50 text-orange-500 rounded-xl flex items-center justify-center text-lg"><i class="fa-solid fa-gift"></i></div>
+                        <div>
+                            <h3 class="text-base font-bold text-gray-900">Manual Adjustment</h3>
+                            <p class="text-xs text-gray-400 font-medium">Admin reward & deduction</p>
+                        </div>
+                    </div>
+
+                    <form id="adjustmentForm" class="space-y-5">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Amount</label>
+                                <div class="relative">
+                                    <span class="absolute left-4 top-3 text-gray-400 font-bold">₹</span>
+                                    <input type="number" id="adjAmount" placeholder="0.00" required class="w-full pl-8 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-semibold focus:outline-none focus:border-blue-500">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Type</label>
+                                <div class="relative">
+                                    <select id="adjType" onchange="handleAdjTypeChange()" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-800 focus:outline-none focus:border-blue-500 appearance-none">
+                                        <option value="Reward">Reward</option>
+                                        <option value="Deduction">Deduction</option>
+                                        <option value="Custom">Custom</option>
+                                    </select>
+                                    <i class="fa-solid fa-chevron-down absolute right-4 top-4 text-gray-400"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="customNameBox" class="hidden">
+                            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Custom Name</label>
+                            <input type="text" id="adjCustomName" placeholder="Enter custom transaction name" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium focus:outline-none focus:border-blue-500">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Reason (Optional)</label>
+                            <input type="text" id="adjReason" placeholder="Enter reason for adjustment" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium focus:outline-none focus:border-blue-500">
+                        </div>
+
+                        <div class="bg-blue-50 border border-blue-100 p-4 rounded-xl flex gap-3 text-blue-800 text-xs font-medium leading-relaxed">
+                            <i class="fa-solid fa-circle-info mt-0.5 text-blue-500"></i>
+                            <p id="adjWarningText">This will be added to user wallet and recorded in history. This action is irreversible once confirmed.</p>
+                        </div>
+
+                        <button type="submit" id="adjSubmitBtn" class="w-full bg-[#111827] hover:bg-black text-white font-bold text-sm py-3.5 rounded-xl transition shadow-md flex justify-center items-center gap-2 mt-2">
+                            <i class="fa-solid fa-circle-plus"></i> Credit Balance
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-gray-100 overflow-hidden">
+                <div class="p-6 border-b border-gray-50 flex justify-between items-center">
+                    <div class="flex items-center gap-2 text-blue-600 font-bold text-sm"><i class="fa-solid fa-arrows-rotate"></i> Recent Operations Log</div>
+                    <button onclick="fetchAdminLogs()" class="text-xs font-bold text-blue-600 hover:text-blue-800">REFRESH</button>
+                </div>
+                <div class="overflow-x-auto no-scrollbar min-h-[150px]">
+                    <table class="w-full text-left whitespace-nowrap">
+                        <thead class="text-[11px] font-bold text-gray-400 uppercase tracking-wider bg-gray-50/50">
+                            <tr>
+                                <th class="px-6 py-4">USER ID</th>
+                                <th class="px-6 py-4">ACTION TYPE</th>
+                                <th class="px-6 py-4 text-center">AMOUNT</th>
+                                <th class="px-6 py-4 text-center">STATUS</th>
+                                <th class="px-6 py-4 text-right">TIME</th>
+                            </tr>
+                        </thead>
+                        <tbody id="logsTableBody" class="divide-y divide-gray-50 text-sm font-medium text-gray-700">
+                            <tr><td colspan="5" class="p-8 text-center text-gray-400">Loading operations...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <div id="confirmModal" class="fixed inset-0 bg-gray-900 bg-opacity-60 z-50 hidden flex items-center justify-center p-4 transition-opacity">
+        <div class="bg-white rounded-3xl w-full max-w-sm p-6 shadow-2xl relative">
+            <button onclick="closeModal('confirmModal')" class="absolute top-5 right-5 text-gray-400 hover:text-gray-700"><i class="fa-solid fa-xmark text-xl"></i></button>
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center text-2xl mx-auto mb-4"><i class="fa-solid fa-paper-plane"></i></div>
+                <h3 class="text-lg font-bold text-gray-900">Confirm Payout</h3>
+                <p class="text-xs text-gray-500 mt-1">Please review the payout details</p>
+            </div>
+            
+            <div class="bg-gray-50 border border-gray-100 rounded-xl p-4 space-y-3 text-sm">
+                <div class="flex justify-between"><span class="text-gray-500">User ID</span><span class="font-bold text-gray-900" id="confUserId">-</span></div>
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-500">UPI ID</span>
+                    <div class="text-right">
+                        <span class="font-bold text-gray-900" id="confUpi">-</span>
+                        <div class="text-[10px] text-gray-400" id="confUpiProvider"></div>
+                    </div>
+                </div>
+                <div class="flex justify-between"><span class="text-gray-500">UTR</span><span class="font-mono text-xs font-bold text-gray-900" id="confUtr">-</span></div>
+                <hr class="border-gray-200 border-dashed">
+                <div class="flex justify-between items-center"><span class="text-gray-500">Amount</span><span class="text-xl font-black text-red-500" id="confAmt">-₹0.00</span></div>
+            </div>
+
+            <div class="mt-6 flex gap-3">
+                <button onclick="closeModal('confirmModal')" class="flex-1 py-3 bg-gray-100 text-gray-600 font-bold text-sm rounded-xl hover:bg-gray-200 transition">Cancel</button>
+                <button onclick="executeConfirmedPayout()" class="flex-1 py-3 bg-blue-600 text-white font-bold text-sm rounded-xl hover:bg-blue-700 transition shadow-md">Confirm & Send</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('-translate-x-full');
+            document.getElementById('sidebarOverlay').classList.toggle('hidden');
+        }
+        function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+        function timeSince(dateStr) {
+            const date = new Date(dateStr);
+            const seconds = Math.floor((new Date() - date) / 1000);
+            let interval = seconds / 31536000;
+            if (interval > 1) return Math.floor(interval) + " years ago";
+            interval = seconds / 2592000;
+            if (interval > 1) return Math.floor(interval) + " months ago";
+            interval = seconds / 86400;
+            if (interval > 1) return Math.floor(interval) + " days ago";
+            interval = seconds / 3600;
+            if (interval > 1) return Math.floor(interval) + " hours ago";
+            interval = seconds / 60;
+            if (interval > 1) return Math.floor(interval) + " mins ago";
+            if(Math.floor(seconds) < 10) return "Just now";
+            return Math.floor(seconds) + " seconds ago";
+        }
+
+        function handleAdjTypeChange() {
+            const type = document.getElementById('adjType').value;
+            const btn = document.getElementById('adjSubmitBtn');
+            const customBox = document.getElementById('customNameBox');
+            const warningText = document.getElementById('adjWarningText');
+
+            if(type === 'Custom') {
+                customBox.classList.remove('hidden');
+                btn.innerHTML = '<i class="fa-solid fa-bolt"></i> Process Custom';
+            } else {
+                customBox.classList.add('hidden');
+            }
+
+            if(type === 'Deduction') {
+                btn.innerHTML = '<i class="fa-solid fa-circle-minus"></i> Deduct Balance';
+                btn.classList.replace('bg-[#111827]', 'bg-red-600');
+                btn.classList.replace('hover:bg-black', 'hover:bg-red-700');
+                warningText.innerText = "This will be deducted from user wallet and recorded in history. This action is irreversible once confirmed.";
+            } else if (type === 'Reward') {
+                btn.innerHTML = '<i class="fa-solid fa-circle-plus"></i> Credit Balance';
+                btn.classList.replace('bg-red-600', 'bg-[#111827]');
+                btn.classList.replace('hover:bg-red-700', 'hover:bg-black');
+                warningText.innerText = "This will be added to user wallet and recorded in history. This action is irreversible once confirmed.";
+            }
+        }
+    </script>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, query, where, getDocs, doc, updateDoc, addDoc, onSnapshot, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCHoR7wojkpTZZPR-gcfDnPW8aOTuoiaAU",
+            authDomain: "nexapay-342d0.firebaseapp.com",
+            databaseURL: "https://nexapay-342d0-default-rtdb.firebaseio.com",
+            projectId: "nexapay-342d0",
+            storageBucket: "nexapay-342d0.firebasestorage.app",
+            messagingSenderId: "305096071099",
+            appId: "1:305096071099:web:3db1e75a2669adbcae569e"
+        };
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        let selectedUserDoc = null;
+        let selectedUpiProvider = '';
+
+        // 1. Search Identify User & Fetch their UPI List
+        document.getElementById('searchUserForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = e.target.querySelector('button');
+            const originalText = btn.innerText;
+            btn.innerText = '...';
+            const searchVal = document.getElementById('inputSearchUser').value.trim();
+            const resultBox = document.getElementById('userResultBox');
+
+            try {
+                let userQuery = query(collection(db, "users"), where("userId", "==", searchVal));
+                let snap = await getDocs(userQuery);
+                
+                if(snap.empty) {
+                    userQuery = query(collection(db, "users"), where("phone", "==", searchVal));
+                    snap = await getDocs(userQuery);
+                }
+
+                if(!snap.empty) {
+                    const userDoc = snap.docs[0];
+                    selectedUserDoc = { id: userDoc.id, ...userDoc.data() };
+                    
+                    document.getElementById('actionOverlay').classList.add('hidden');
+
+                    const balance = Number(selectedUserDoc.balance || 0).toFixed(2);
+                    const tDep = Number(selectedUserDoc.todayDep || 0).toFixed(2);
+                    const tWith = Number(selectedUserDoc.todayWith || 0).toFixed(2);
+
+                    // Update Top UI
+                    resultBox.className = "bg-white p-6 rounded-2xl shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-gray-100 relative";
+                    resultBox.innerHTML = `
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center"><i class="fa-regular fa-user"></i></div>
+                                <div>
+                                    <h4 class="font-bold text-gray-900 text-sm">User ID: ${selectedUserDoc.userId} <span class="bg-green-100 text-green-700 text-[9px] px-1.5 py-0.5 rounded font-bold uppercase ml-1">Active</span></h4>
+                                    <p class="text-xs text-gray-500 flex items-center gap-1"><i class="fa-solid fa-mobile-screen text-[10px]"></i> ${selectedUserDoc.phone || 'N/A'}</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Total Balance</p>
+                                <h3 class="text-xl font-black text-blue-600">${balance}</h3>
+                            </div>
+                        </div>
+                        <div class="bg-gray-50 rounded-xl p-3 flex justify-between items-center">
+                            <span class="text-xs font-bold text-gray-500 uppercase">Today Dep/With</span>
+                            <span class="text-xs font-bold text-gray-700">${tDep} / ${tWith}</span>
+                        </div>
+                    `;
+
+                    // 🚨 Fetch Active UPIs linked to this user from 'user_upi_accounts' 🚨
+                    const upiQuery = query(collection(db, "user_upi_accounts"), where("ownerUserId", "==", selectedUserDoc.id), where("isSaleActive", "==", true));
+                    const upiSnap = await getDocs(upiQuery);
+                    
+                    const upiSelect = document.getElementById('payoutUpiSelect');
+                    if(!upiSnap.empty) {
+                        let optionsHtml = '';
+                        upiSnap.forEach(uDoc => {
+                            const uData = uDoc.data();
+                            // Value contains both vpa and providerName separated by pipe for extraction
+                            optionsHtml += `<option value="${uData.vpaAddress}|${uData.providerName}">${uData.vpaAddress} (@${uData.providerName})</option>`;
+                        });
+                        upiSelect.innerHTML = optionsHtml;
+                    } else {
+                        upiSelect.innerHTML = `<option value="">No Active UPI Linked</option>`;
+                    }
+
+                } else {
+                    document.getElementById('actionOverlay').classList.remove('hidden');
+                    selectedUserDoc = null;
+                    resultBox.className = "bg-gray-50 p-6 rounded-2xl shadow-inner border border-gray-100 flex flex-col justify-center items-center text-gray-400";
+                    resultBox.innerHTML = `<i class="fa-solid fa-user-xmark text-3xl mb-2 text-gray-300"></i><p class="text-sm font-medium">User not found in system.</p>`;
+                }
+            } catch (err) {
+                alert("Error searching user: " + err.message);
+            }
+            btn.innerText = originalText;
+        });
+
+        // 2. Manual Payout Modal Request
+        document.getElementById('payoutForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            if(!selectedUserDoc) return alert("Identify a user first.");
+            
+            const upiRaw = document.getElementById('payoutUpiSelect').value;
+            const amt = parseFloat(document.getElementById('payoutAmount').value);
+            const utr = document.getElementById('payoutUtr').value.trim();
+
+            if(!upiRaw) return alert("User has no active UPI ID linked. Ask user to add and enable a UPI in their app.");
+            if(amt <= 0 || isNaN(amt)) return alert("Enter valid payout amount.");
+            if(!utr) return alert("Enter UTR reference.");
+            if(amt > selectedUserDoc.balance) return alert("Insufficient user balance.");
+
+            const [upiAddress, provider] = upiRaw.split('|');
+            selectedUpiProvider = provider;
+
+            // Populate Modal exactly like Image 5
+            document.getElementById('confUserId').innerText = selectedUserDoc.userId;
+            document.getElementById('confUpi').innerText = upiAddress;
+            document.getElementById('confUpiProvider').innerText = provider;
+            document.getElementById('confUtr').innerText = utr;
+            document.getElementById('confAmt').innerText = `-₹${amt.toFixed(2)}`;
+
+            openModal('confirmModal');
+        });
+
+        // Execute Payout Confirmed
+        window.executeConfirmedPayout = async function() {
+            const btn = document.querySelector('#confirmModal button.bg-blue-600');
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+            btn.disabled = true;
+
+            const upiRaw = document.getElementById('payoutUpiSelect').value;
+            const amt = parseFloat(document.getElementById('payoutAmount').value);
+            const utr = document.getElementById('payoutUtr').value.trim();
+            const [upiAddress, provider] = upiRaw.split('|');
+
+            try {
+                // 1. Deduct Balance
+                const newBalance = selectedUserDoc.balance - amt;
+                const newTodayWith = (selectedUserDoc.todayWith || 0) + amt;
+                await updateDoc(doc(db, "users", selectedUserDoc.id), { 
+                    balance: newBalance,
+                    todayWith: newTodayWith
+                });
+
+                // 2. Add to unified token history (Type: Withdrawal, Status: SUCCESS)
+                await addDoc(collection(db, "token_history"), {
+                    userId: selectedUserDoc.id,
+                    type: 'Withdrawal',
+                    amount: amt,
+                    status: 'SUCCESS',
+                    balanceBefore: selectedUserDoc.balance,
+                    balanceAfter: newBalance,
+                    upiId: upiAddress,
+                    channel: provider,
+                    description: `Manual payout - UTR: ${utr}`,
+                    timestamp: new Date().toISOString()
+                });
+
+                // 3. Add Admin Log
+                await addDoc(collection(db, "admin_operations"), {
+                    userId: selectedUserDoc.userId,
+                    actionType: 'Payout',
+                    amount: -amt,
+                    status: 'SUCCESS',
+                    timestamp: new Date().toISOString()
+                });
+
+                closeModal('confirmModal');
+                alert("Payout executed successfully! Balance deducted & Token History updated.");
+                document.getElementById('payoutForm').reset();
+                selectedUserDoc.balance = newBalance; // update local state
+                selectedUserDoc.todayWith = newTodayWith;
+                
+                // Refresh Top Box UI
+                document.getElementById('searchUserForm').dispatchEvent(new Event('submit'));
+                
+            } catch (err) {
+                alert("Error: " + err.message);
+            }
+            btn.innerHTML = 'Confirm & Send';
+            btn.disabled = false;
+        };
+
+        // 3. Manual Adjustment Execution (Reward/Deduction/Custom)
+        document.getElementById('adjustmentForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if(!selectedUserDoc) return alert("Identify a user first.");
+            
+            const amt = parseFloat(document.getElementById('adjAmount').value);
+            const type = document.getElementById('adjType').value;
+            const customName = document.getElementById('adjCustomName').value.trim();
+            const reason = document.getElementById('adjReason').value.trim();
+
+            if(amt <= 0 || isNaN(amt)) return alert("Enter valid adjustment amount.");
+
+            const btn = document.getElementById('adjSubmitBtn');
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+
+            try {
+                let newBalance = Number(selectedUserDoc.balance);
+                let historyType = '';
+                let finalTitle = '';
+                let logAmt = amt;
+
+                // Adjust logic mapping to images 7, 8, 9
+                if (type === 'Deduction') {
+                    if (amt > newBalance) return alert("Cannot deduct more than user's balance.");
+                    newBalance -= amt;
+                    historyType = 'Deduction';
+                    finalTitle = 'Deduction';
+                    logAmt = -amt;
+                } else if (type === 'Reward') {
+                    newBalance += amt;
+                    historyType = 'Reward';
+                    finalTitle = 'Reward';
+                } else if (type === 'Custom') {
+                    if(!customName) return alert("Custom name is required.");
+                    newBalance += amt; // Custom defaults to credit, adjust if needed
+                    historyType = customName;
+                    finalTitle = customName;
+                }
+
+                const balanceBeforeAdj = selectedUserDoc.balance;
+
+                // 1. Update Balance
+                await updateDoc(doc(db, "users", selectedUserDoc.id), { balance: newBalance });
+
+                // 2. Push to Token History (Unified for app view)
+                await addDoc(collection(db, "token_history"), {
+                    userId: selectedUserDoc.id,
+                    type: historyType,
+                    amount: amt,
+                    status: 'SUCCESS',
+                    balanceBefore: balanceBeforeAdj,
+                    balanceAfter: newBalance,
+                    description: reason || finalTitle,
+                    timestamp: new Date().toISOString()
+                });
+
+                // 3. Add Admin Log
+                await addDoc(collection(db, "admin_operations"), {
+                    userId: selectedUserDoc.userId,
+                    actionType: type === 'Custom' ? customName : type,
+                    amount: logAmt,
+                    status: 'SUCCESS',
+                    timestamp: new Date().toISOString()
+                });
+
+                alert(`${finalTitle} processed successfully! Updated balance: ₹${newBalance.toFixed(2)}`);
+                document.getElementById('adjustmentForm').reset();
+                selectedUserDoc.balance = newBalance; // update local
+                handleAdjTypeChange();
+                
+                // Refresh Top Box UI
+                document.getElementById('searchUserForm').dispatchEvent(new Event('submit'));
+
+            } catch (err) {
+                alert("Error: " + err.message);
+            }
+            handleAdjTypeChange(); 
+        });
+
+        // 4. Fetch Recent Operations Logs (Format matches Image 6 bottom section)
+        window.fetchAdminLogs = function() {
+            const tbody = document.getElementById('logsTableBody');
+            tbody.innerHTML = '<tr><td colspan="5" class="p-8 text-center text-gray-400">Loading operations...</td></tr>';
+            
+            const qLogs = query(collection(db, "admin_operations"), orderBy("timestamp", "desc"), limit(10));
+            onSnapshot(qLogs, (snapshot) => {
+                tbody.innerHTML = '';
+                if(snapshot.empty) {
+                    tbody.innerHTML = '<tr><td colspan="5" class="p-8 text-center text-gray-400">No recent operations.</td></tr>';
+                    return;
+                }
+
+                snapshot.forEach(docSnap => {
+                    const data = docSnap.data();
+                    const amtClass = data.amount < 0 ? 'text-red-500' : 'text-green-500';
+                    const amtFormat = data.amount < 0 ? data.amount.toFixed(2) : `+${data.amount.toFixed(2)}`;
+                    
+                    let dotColor = 'bg-blue-600';
+                    if(data.actionType === 'Reward') dotColor = 'bg-yellow-400';
+                    if(data.actionType === 'Deduction') dotColor = 'bg-red-500';
+
+                    tbody.innerHTML += `
+                        <tr class="hover:bg-gray-50 transition border-b border-gray-50 last:border-0">
+                            <td class="px-6 py-4 font-bold text-gray-900">${data.userId}</td>
+                            <td class="px-6 py-4 flex items-center gap-2 text-gray-600 font-bold"><span class="w-2 h-2 rounded-full ${dotColor}"></span> ${data.actionType}</td>
+                            <td class="px-6 py-4 text-center font-black ${amtClass}">${amtFormat}</td>
+                            <td class="px-6 py-4 text-center"><span class="bg-green-100 text-green-600 px-2 py-1 rounded font-bold text-[10px] uppercase border border-green-200">${data.status}</span></td>
+                            <td class="px-6 py-4 text-right text-xs text-gray-500 font-bold">${timeSince(data.timestamp)}</td>
+                        </tr>
+                    `;
+                });
+            });
+        };
+
+        window.addEventListener('DOMContentLoaded', () => {
+            window.fetchAdminLogs();
+        });
+    </script>
+</body>
+</html>

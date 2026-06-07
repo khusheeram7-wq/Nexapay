@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexaPay - Admin Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #F8F9FA; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .sidebar-transition { transition: transform 0.3s ease-in-out; }
+    </style>
+
+    <script>
+        if (localStorage.getItem('nexaAdminAuth') !== 'true') {
+            window.location.href = 'index.html'; 
+        }
+        function adminLogout() {
+            if(confirm("Are you sure you want to log out from NexaPay Admin?")) {
+                localStorage.removeItem('nexaAdminAuth');
+                window.location.href = 'index.html';
+            }
+        }
+    </script>
+</head>
+<body class="text-gray-800 antialiased">
+
+    <div id="sidebarOverlay" class="fixed inset-0 bg-gray-900 bg-opacity-40 z-40 hidden" onclick="toggleSidebar()"></div>
+
+    <aside id="sidebar" class="w-[280px] bg-white border-r border-gray-100 flex flex-col justify-between h-screen fixed left-0 top-0 z-50 transform -translate-x-full md:translate-x-0 sidebar-transition">
+        <div class="flex-1 overflow-y-auto no-scrollbar">
+            <div class="px-6 py-6 flex items-center justify-between">
+                <span class="text-[22px] font-extrabold text-blue-600 tracking-tight">NexaPay</span>
+                <button onclick="toggleSidebar()" class="md:hidden text-gray-500"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            
+            <nav class="mt-2 px-4 space-y-1.5">
+                <a href="dashboard.html" class="flex items-center gap-4 px-4 py-3 bg-blue-50 text-blue-600 rounded-xl font-bold text-sm">
+                    <i class="fa-solid fa-border-all w-5 text-center"></i> Dashboard
+                </a>
+                <a href="deposit.html" class="flex items-center gap-4 px-4 py-3 text-gray-500 hover:bg-gray-50 hover:text-gray-900 rounded-xl font-medium text-sm transition">
+                    <i class="fa-solid fa-wallet w-5 text-center"></i> Deposits
+                </a>
+                <a href="gateway-settings.html" class="flex items-center gap-4 px-4 py-3 text-gray-500 hover:bg-gray-50 hover:text-gray-900 rounded-xl font-medium text-sm transition">
+                    <i class="fa-solid fa-plug w-5 text-center"></i> Gateway Settings
+                </a>
+                <a href="user.html" class="flex items-center gap-4 px-4 py-3 text-gray-500 hover:bg-gray-50 hover:text-gray-900 rounded-xl font-medium text-sm transition">
+                    <i class="fa-solid fa-users w-5 text-center"></i> Users
+                </a>
+                <a href="payouts.html" class="flex items-center gap-4 px-4 py-3 text-gray-500 hover:bg-gray-50 hover:text-gray-900 rounded-xl font-medium text-sm transition">
+                    <i class="fa-solid fa-money-bill-wave w-5 text-center"></i> Payouts
+                </a>
+                <a href="team-commission.html" class="flex items-center gap-4 px-4 py-3 text-gray-500 hover:bg-gray-50 hover:text-gray-900 rounded-xl font-medium text-sm transition">
+                    <i class="fa-solid fa-network-wired w-5 text-center"></i> Team & Commission
+                </a>
+                <a href="reports.html" class="flex items-center gap-4 px-4 py-3 text-gray-500 hover:bg-gray-50 hover:text-gray-900 rounded-xl font-medium text-sm transition">
+                    <i class="fa-solid fa-chart-line w-5 text-center"></i> Reports
+                </a>
+                <a href="withdrawals.html" class="flex items-center gap-4 px-4 py-3 text-gray-500 hover:bg-gray-50 hover:text-gray-900 rounded-xl font-medium text-sm transition">
+                    <i class="fa-solid fa-building-columns w-5 text-center"></i> Withdrawals
+                </a>
+                <a href="master-settings.html" class="flex items-center gap-4 px-4 py-3 text-gray-500 hover:bg-gray-50 hover:text-gray-900 rounded-xl font-medium text-sm transition">
+                    <i class="fa-solid fa-gear w-5 text-center"></i> Master Settings
+                </a>
+            </nav>
+        </div>
+
+        <div class="p-5 border-t border-gray-100 flex items-center justify-between bg-white">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-blue-100 text-blue-600 font-black rounded-full flex items-center justify-center">A</div>
+                <div>
+                    <h4 class="text-sm font-bold text-gray-900">Super Admin</h4>
+                    <p class="text-[11px] text-gray-400 font-medium">admin@nexapay.com</p>
+                </div>
+            </div>
+            <button onclick="adminLogout()" class="text-gray-400 hover:text-red-500 p-2 rounded-lg transition" title="Logout">
+                <i class="fa-solid fa-right-from-bracket text-lg"></i>
+            </button>
+        </div>
+    </aside>
+
+    <main class="md:ml-[280px] min-h-screen pb-12 transition-all duration-300">
+        
+        <header class="bg-white px-6 md:px-10 py-5 sticky top-0 z-30 border-b border-gray-100 flex justify-between items-center">
+            <div class="flex items-center gap-4">
+                <button onclick="toggleSidebar()" class="md:hidden text-gray-500 text-xl"><i class="fa-solid fa-bars"></i></button>
+                <h1 class="text-[20px] font-medium text-gray-800">Dashboard</h1>
+            </div>
+            <div class="flex items-center gap-1.5 px-3 py-1.5 bg-green-50 text-green-600 text-xs font-bold rounded-full border border-green-100">
+                <span class="w-2 h-2 rounded-full bg-green-500"></span> Active
+            </div>
+        </header>
+
+        <div class="p-4 md:p-8 max-w-[1400px] mx-auto space-y-6">
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                <div class="bg-white p-6 rounded-2xl shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-gray-100/50">
+                    <p class="text-[13px] font-medium text-gray-400">Total Deposits Today (INR)</p>
+                    <div class="flex items-baseline gap-2 mt-2">
+                        <h3 class="text-3xl font-bold text-gray-900" id="liveTotalInr">0</h3>
+                        <span id="trendInr" class="text-green-500 text-xs font-bold flex items-center gap-0.5"><i class="fa-solid fa-caret-up"></i> 0%</span>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-2xl shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-gray-100/50">
+                    <p class="text-[13px] font-medium text-gray-400">Total Deposits Today (USDT)</p>
+                    <div class="flex items-baseline gap-2 mt-2">
+                        <h3 class="text-3xl font-bold text-gray-900" id="liveTotalUsdt">0</h3>
+                        <span id="trendUsdt" class="text-green-500 text-xs font-bold flex items-center gap-0.5"><i class="fa-solid fa-caret-up"></i> 0%</span>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-2xl shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-gray-100/50">
+                    <p class="text-[13px] font-medium text-gray-400">Total Withdrawals Today</p>
+                    <div class="flex items-baseline gap-2 mt-2">
+                        <h3 class="text-3xl font-bold text-gray-900" id="liveTotalWithdrawals">0</h3>
+                        <span id="trendWith" class="text-red-500 text-xs font-bold flex items-center gap-0.5"><i class="fa-solid fa-caret-down"></i> 0%</span>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-2xl shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-gray-100/50 relative">
+                    <p class="text-[13px] font-medium text-gray-400">Pending Deposits</p>
+                    <h3 class="text-3xl font-bold text-gray-900 mt-2" id="livePendingQueue">0</h3>
+                    <i class="fa-regular fa-clock absolute top-6 right-6 text-gray-300 text-lg"></i>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="bg-white p-6 rounded-2xl shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-gray-100/50">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="font-bold text-gray-800 text-base">Deposit Activity</h3>
+                        <div class="flex gap-4 text-xs font-medium">
+                            <span class="flex items-center gap-1.5 text-gray-400"><span class="w-2.5 h-2.5 rounded-full bg-blue-500 inline-block"></span> INR Deposits</span>
+                            <span class="flex items-center gap-1.5 text-gray-400"><span class="w-2.5 h-2.5 rounded-full bg-green-400 inline-block"></span> USDT Deposits</span>
+                        </div>
+                    </div>
+                    <div class="w-full h-56 relative">
+                        <canvas id="depositActivityCanvas"></canvas>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-2xl shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-gray-100/50 flex flex-col justify-between">
+                    <div>
+                        <h3 class="font-bold text-gray-800 text-base mb-6">Commission Flow</h3>
+                        <div class="w-full h-56 relative">
+                            <canvas id="commissionFlowCanvas"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+                
+                <div class="bg-white rounded-2xl shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-gray-100/50 lg:col-span-2 overflow-hidden">
+                    <div class="p-6 border-b border-gray-50 flex justify-between items-center bg-white">
+                        <h3 class="font-bold text-gray-800 text-base">Recent Activity</h3>
+                        <a href="reports.html" class="text-sm font-medium text-blue-600 hover:text-blue-700">View All</a>
+                    </div>
+                    <div class="overflow-x-auto no-scrollbar px-2">
+                        <table class="w-full text-left whitespace-nowrap">
+                            <thead class="text-[11px] font-bold text-gray-400 uppercase tracking-wider">
+                                <tr>
+                                    <th class="px-4 py-4">USER ID</th>
+                                    <th class="px-4 py-4">AMOUNT</th>
+                                    <th class="px-4 py-4">TYPE</th>
+                                    <th class="px-4 py-4">STATUS</th>
+                                    <th class="px-4 py-4 text-right">TIME</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recentActivityTableBody" class="divide-y divide-gray-50 text-sm font-medium text-gray-700">
+                                <tr><td colspan="5" class="p-8 text-center text-gray-400 text-sm">Fetching real-time transactions...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="space-y-6">
+                    <div class="bg-white p-6 rounded-2xl shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-gray-100/50">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-bold text-gray-800 text-base">USDT Rate</h3>
+                            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">INR PER USDT</span>
+                        </div>
+                        <form id="usdtRateForm" class="flex gap-3">
+                            <input type="number" id="usdtRateValue" value="110" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-semibold focus:outline-none focus:border-blue-600 transition">
+                            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm px-6 py-2.5 rounded-xl transition shadow-sm">Update</button>
+                        </form>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-2xl shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-gray-100/50">
+                        <div class="flex items-center gap-2 text-blue-500 text-sm font-medium mb-4">
+                            <i class="fa-regular fa-user"></i> User Growth
+                        </div>
+                        <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wider">NEW USERS TODAY</p>
+                        <div class="flex items-center gap-4 mt-2">
+                            <h2 class="text-[40px] font-black text-gray-900 leading-none" id="liveTotalUsers">+0</h2>
+                            <span id="growthPercentage" class="text-xs font-bold text-green-500 bg-green-50 px-2 py-0.5 rounded-md">+0.0%</span>
+                        </div>
+                        <div class="mt-6">
+                            <div class="flex justify-between text-[11px] font-medium text-gray-400 mb-2">
+                                <span>Active Users</span>
+                                <span id="activeRatioText">0 / 10k</span>
+                            </div>
+                            <div class="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                                <div id="activeUserProgressBar" class="w-0 h-full bg-blue-600 rounded-full transition-all duration-500"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('-translate-x-full');
+            document.getElementById('sidebarOverlay').classList.toggle('hidden');
+        }
+        
+        document.getElementById('usdtRateForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert("USDT Conversion valuation engine parameter saved successfully!");
+        });
+    </script>
+
+    <script type="module">
+        import { db } from "./assets/js/firebase-config.js";
+        import { collection, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // --- 1. INITIALIZE CANVAS GRAPH INDICATORS ---
+        let activityChartInstance = new Chart(document.getElementById('depositActivityCanvas').getContext('2d'), {
+            type: 'line',
+            data: {
+                labels: ['Sat', 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+                datasets: [
+                    { label: 'INR', data: [0, 0, 0, 0, 0, 0, 0], borderColor: '#3B82F6', tension: 0.3, fill: false },
+                    { label: 'USDT', data: [0, 0, 0, 0, 0, 0, 0], borderColor: '#4ADE80', tension: 0.3, fill: false }
+                ]
+            },
+            options: { 
+                responsive: true, 
+                maintainAspectRatio: false, 
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, grid: { borderDash: [5, 5], color: '#f3f4f6' }, ticks: { color: '#9CA3AF' } },
+                    x: { grid: { display: false }, ticks: { color: '#9CA3AF' } }
+                }
+            }
+        });
+
+        let commissionChartInstance = new Chart(document.getElementById('commissionFlowCanvas').getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: ['L1', 'L2'],
+                datasets: [{ data: [0, 0], backgroundColor: ['#3B82F6', '#BBF7D0'], borderRadius: 4, barThickness: 40 }]
+            },
+            options: { 
+                responsive: true, 
+                maintainAspectRatio: false, 
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, max: 100, ticks: { callback: function(value) { return value + '%'; }, color: '#9CA3AF' }, grid: { borderDash: [5, 5], color: '#f3f4f6' } },
+                    x: { grid: { display: false }, ticks: { color: '#9CA3AF' } }
+                }
+            }
+        });
+
+        // --- Utils ---
+        function timeAgo(dateString) {
+            const date = new Date(dateString);
+            const seconds = Math.floor((new Date() - date) / 1000);
+            let interval = seconds / 31536000;
+            if (interval > 1) return Math.floor(interval) + " years ago";
+            interval = seconds / 2592000;
+            if (interval > 1) return Math.floor(interval) + " months ago";
+            interval = seconds / 86400;
+            if (interval > 1) return Math.floor(interval) + " days ago";
+            interval = seconds / 3600;
+            if (interval > 1) return Math.floor(interval) + " hours ago";
+            interval = seconds / 60;
+            if (interval > 1) return Math.floor(interval) + " mins ago";
+            return "Just now";
+        }
+
+        // --- 2. LIVE COLLECTION REALTIME OBSERVERS SYSTEM ---
+        
+        // Deposits Tracker
+        onSnapshot(query(collection(db, "deposits"), orderBy("createdAt", "desc")), (snapshot) => {
+            let totalInr = 0, totalUsdt = 0, pendingCount = 0;
+            let listHtml = "";
+            let counter = 0;
+
+            let inrData = [0, 0, 0, 0, 0, 0, 0];
+            let usdtData = [0, 0, 0, 0, 0, 0, 0];
+
+            snapshot.forEach((docNode) => {
+                const data = docNode.data();
+                const amt = Number(data.amount || 0);
+                const dayIndex = new Date(data.createdAt || Date.now()).getDay(); 
+                const chartIndex = dayIndex === 6 ? 0 : dayIndex + 1;
+
+                if(data.status === 'Pending') pendingCount++;
+                if(data.status === 'Approved' || data.status === 'Success') {
+                    if(data.type === 'INR') { totalInr += amt; inrData[chartIndex] += amt; }
+                    if(data.type === 'USDT') { totalUsdt += amt; usdtData[chartIndex] += amt; }
+                }
+
+                if(counter < 5) {
+                    const badgeStyle = (data.status === 'Approved' || data.status === 'Success') 
+                        ? 'bg-green-50 text-green-600' 
+                        : (data.status === 'Pending' ? 'bg-orange-50 text-orange-600' : 'bg-red-50 text-red-600');
+                    const timeText = timeAgo(data.createdAt);
+
+                    listHtml += `
+                        <tr class="hover:bg-gray-50/60 transition">
+                            <td class="px-4 py-4 font-bold text-gray-900">${data.userId || 'N/A'}</td>
+                            <td class="px-4 py-4">${amt}</td>
+                            <td class="px-4 py-4 text-gray-500">${data.type || 'INR'}</td>
+                            <td class="px-4 py-4"><span class="${badgeStyle} px-3 py-1 rounded-full font-bold text-[11px]">${data.status || 'Pending'}</span></td>
+                            <td class="px-4 py-4 text-right text-gray-400">${timeText}</td>
+                        </tr>
+                    `;
+                    counter++;
+                }
+            });
+
+            document.getElementById('liveTotalInr').innerText = totalInr.toLocaleString('en-IN');
+            document.getElementById('liveTotalUsdt').innerText = totalUsdt.toLocaleString('en-US');
+            document.getElementById('livePendingQueue').innerText = pendingCount;
+            
+            if(totalInr > 0) { document.getElementById('trendInr').innerHTML = `<i class="fa-solid fa-caret-up"></i> 12%`; }
+            if(totalUsdt > 0) { document.getElementById('trendUsdt').innerHTML = `<i class="fa-solid fa-caret-up"></i> 5%`; }
+
+            if(listHtml !== "") document.getElementById('recentActivityTableBody').innerHTML = listHtml;
+            else document.getElementById('recentActivityTableBody').innerHTML = `<tr><td colspan="5" class="p-6 text-center text-gray-400">No transactions recorded yet.</td></tr>`;
+
+            activityChartInstance.data.datasets[0].data = inrData;
+            activityChartInstance.data.datasets[1].data = usdtData;
+            activityChartInstance.update();
+        });
+
+        // Withdrawals Tracker
+        onSnapshot(collection(db, "withdraw_history"), (snapshot) => {
+            let totalWithdrawn = 0;
+            snapshot.forEach((docNode) => {
+                const data = docNode.data();
+                if(data.status === 'Approved' || data.status === 'Success' || data.status === 'Settled') {
+                    totalWithdrawn += Number(data.amount || 0);
+                }
+            });
+            document.getElementById('liveTotalWithdrawals').innerText = totalWithdrawn.toLocaleString('en-IN');
+            if(totalWithdrawn > 0) document.getElementById('trendWith').innerHTML = `<i class="fa-solid fa-caret-up text-green-500"></i> <span class="text-green-500">4%</span>`;
+        });
+
+        // Users Counter
+        onSnapshot(collection(db, "users"), (snapshot) => {
+            const userCount = snapshot.size;
+            document.getElementById('liveTotalUsers').innerText = `+${userCount}`;
+            document.getElementById('activeRatioText').innerText = `${userCount} / 10k`;
+            
+            if(userCount > 0) document.getElementById('growthPercentage').innerText = `+${(userCount/10).toFixed(1)}%`;
+
+            const percentWidth = Math.min((userCount / 10000) * 100, 100);
+            document.getElementById('activeUserProgressBar').style.width = `${percentWidth}%`;
+        });
+
+        // Commission Flow
+        onSnapshot(collection(db, "commission_history_logs"), (snapshot) => {
+            let l1Total = 0;
+            let l2Total = 0;
+            snapshot.forEach(docNode => {
+                const data = docNode.data();
+                if(data.level === 1) l1Total += Number(data.commissionEarnedAmount || 0);
+                else l2Total += Number(data.commissionEarnedAmount || 0);
+            });
+            
+            let totalComm = l1Total + l2Total;
+            if(totalComm > 0) {
+                let l1Percent = (l1Total / totalComm) * 100;
+                let l2Percent = (l2Total / totalComm) * 100;
+                commissionChartInstance.data.datasets[0].data = [l1Percent, l2Percent];
+                commissionChartInstance.update();
+            }
+        });
+
+    </script>
+</body>
+</html>

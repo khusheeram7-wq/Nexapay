@@ -1,0 +1,37 @@
+/* --- assets/css/admin-style.css --- */
+
+body { 
+    font-family: 'Inter', sans-serif; 
+    background-color: #F8F9FA; 
+}
+
+/* Hide Scrollbar Cross-Browser */
+.no-scrollbar::-webkit-scrollbar { 
+    display: none; 
+}
+.no-scrollbar { 
+    -ms-overflow-style: none; 
+    scrollbar-width: none; 
+}
+
+/* Sidebar Animation */
+.sidebar-transition { 
+    transition: transform 0.3s ease-in-out; 
+}
+
+/* Custom Toggle Switch CSS */
+.toggle-checkbox:checked { 
+    right: 0; 
+    border-color: #2563EB; 
+}
+.toggle-checkbox:checked + .toggle-label { 
+    background-color: #2563EB; 
+}
+
+/* Base Dropdown visibility */
+.dropdown-menu { 
+    display: none; 
+}
+.dropdown-container:hover .dropdown-menu { 
+    display: block; 
+}

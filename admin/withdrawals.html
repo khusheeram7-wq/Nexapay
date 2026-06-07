@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexaPay Admin - Withdrawals</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #F8F9FA; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .sidebar-transition { transition: transform 0.3s ease-in-out; }
+    </style>
+
+    <!-- SECURITY: AUTH GUARD -->
+    <script>
+        if (localStorage.getItem('nexaAdminAuth') !== 'true') {
+            window.location.href = 'index.html'; 
+        }
+        function adminLogout() {
+            if(confirm("Are you sure you want to log out from NexaPay Admin?")) {
+                localStorage.removeItem('nexaAdminAuth');
+                window.location.href = 'index.html';
+            }
+        }
+    </script>
+</head>
+<body class="text-gray-800 antialiased">
+
+    <!-- Mobile Sidebar Overlay -->
+    <div id="sidebarOverlay" class="fixed inset-0 bg-gray-900 bg-opacity-40 z-40 hidden" onclick="toggleSidebar()"></div>
+
+    <!-- Sidebar Layout -->
+    <aside id="sidebar" class="w-[280px] bg-white border-r border-gray-100 flex flex-col justify-between h-screen fixed left-0 top-0 z-50 transform -translate-x-full md:translate-x-0 sidebar-transition">
+        <div class="flex-1 overflow-y-auto no-scrollbar">
+            <div class="px-6 py-6 flex items-center justify-between">
+                <span class="text-[22px] font-extrabold text-blue-600 tracking-tight">NexaPay</span>
+                <button onclick="toggleSidebar()" class="md:hidden text-gray-500"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            
+            <nav class="mt-2 px-4 space-y-1.5">
+                <a href="dashboard.html" class="flex items-center gap-4 px-4 py-3 text-gray-500 hover:bg-gray-50 hover:text-gray-900 rounded-xl font-medium text-sm transition">
+                    <i class="fa-solid fa-border-all w-5 text-center"></i> Dashboard
+                </a>
+                <a href="deposit.html" class="flex items-center gap-4 px-4 py-3 text-gray-500 hover:bg-gray-50 hover:text-gray-900 rounded-xl font-medium text-sm transition">
+                    <i class="fa-solid fa-wallet w-5 text-center"></i> Deposits
+                </a>
+                <a href="gateway-settings.html" class="flex items-center gap-4 px-4 py-3 text-gray-500 hover:bg-gray-50 hover:text-gray-900 rounded-xl font-medium text-sm transition">
+                    <i class="fa-solid fa-plug w-5 text-center"></i> Gateway Settings
+                </a>
+                <a href="user.html" class="flex items-center gap-4 px-4 py-3 text-gray-500 hover:bg-gray-50 hover:text-gray-900 rounded-xl font-medium text-sm transition">
+                    <i class="fa-solid fa-users w-5 text-center"></i> Users
+                </a>
+                <a href="payouts.html" class="flex items-center gap-4 px-4 py-3 text-gray-500 hover:bg-gray-50 hover:text-gray-900 rounded-xl font-medium text-sm transition">
+                    <i class="fa-solid fa-money-bill-wave w-5 text-center"></i> Payouts
+                </a>
+                <a href="team-commission.html" class="flex items-center gap-4 px-4 py-3 text-gray-500 hover:bg-gray-50 hover:text-gray-900 rounded-xl font-medium text-sm transition">
+                    <i class="fa-solid fa-network-wired w-5 text-center"></i> Team & Commission
+                </a>
+                <a href="reports.html" class="flex items-center gap-4 px-4 py-3 text-gray-500 hover:bg-gray-50 hover:text-gray-900 rounded-xl font-medium text-sm transition">
+                    <i class="fa-solid fa-chart-line w-5 text-center"></i> Reports
+                </a>
+                <a href="withdrawals.html" class="flex items-center gap-4 px-4 py-3 bg-blue-50 text-blue-600 rounded-xl font-bold text-sm transition">
+                    <i class="fa-solid fa-building-columns w-5 text-center"></i> Withdrawals
+                </a>
+                <a href="master-settings.html" class="flex items-center gap-4 px-4 py-3 text-gray-500 hover:bg-gray-50 hover:text-gray-900 rounded-xl font-medium text-sm transition">
+                    <i class="fa-solid fa-gear w-5 text-center"></i> Master Settings
+                </a>
+            </nav>
+        </div>
+
+        <div class="p-5 border-t border-gray-100 flex items-center justify-between bg-white">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-blue-100 text-blue-600 font-black rounded-full flex items-center justify-center">A</div>
+                <div>
+                    <h4 class="text-sm font-bold text-gray-900">Super Admin</h4>
+                    <p class="text-[11px] text-gray-400 font-medium">admin@nexapay.com</p>
+                </div>
+            </div>
+            <button onclick="adminLogout()" class="text-gray-400 hover:text-red-500 p-2 rounded-lg transition" title="Logout">
+                <i class="fa-solid fa-right-from-bracket text-lg"></i>
+            </button>
+        </div>
+    </aside>
+
+    <main class="md:ml-[280px] min-h-screen pb-12">
+        <header class="bg-white px-6 md:px-10 py-5 sticky top-0 z-30 border-b border-gray-100 flex justify-between items-center">
+            <div class="flex items-center gap-4">
+                <button onclick="toggleSidebar()" class="md:hidden text-gray-500 text-xl"><i class="fa-solid fa-bars"></i></button>
+                <h1 class="text-[20px] font-medium text-gray-800">Withdrawals</h1>
+            </div>
+            <div class="flex items-center gap-1.5 px-3 py-1.5 bg-green-50 text-green-600 text-xs font-bold rounded-full border border-green-100">
+                <span class="w-2 h-2 rounded-full bg-green-500"></span> Active
+            </div>
+        </header>
+
+        <div class="p-4 md:p-8 max-w-[1400px] mx-auto space-y-6">
+
+            <!-- STATS CARDS -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                <div class="bg-white p-5 rounded-2xl shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-gray-100">
+                    <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">TOTAL WITHDRAW</p>
+                    <h3 class="text-2xl font-black text-gray-900 mt-2" id="statTotalWithdraw">₹0</h3>
+                </div>
+                <div class="bg-white p-5 rounded-2xl shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-gray-100">
+                    <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">TOTAL BONUS</p>
+                    <h3 class="text-2xl font-black text-gray-900 mt-2" id="statTotalBonus">₹0</h3>
+                </div>
+                <div class="bg-white p-5 rounded-2xl shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-gray-100">
+                    <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">TOTAL TRANSACTIONS</p>
+                    <h3 class="text-2xl font-black text-gray-900 mt-2" id="statTotalTransactions">0</h3>
+                </div>
+                <div class="bg-white p-5 rounded-2xl shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-gray-100">
+                    <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">COMPLETED TODAY</p>
+                    <h3 class="text-2xl font-black text-gray-900 mt-2" id="statCompletedToday">₹0</h3>
+                </div>
+            </div>
+
+            <!-- TRANSACTIONS LIST CONTAINER -->
+            <div class="bg-white rounded-2xl shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-gray-100 overflow-hidden">
+                <div class="p-6 md:p-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-b border-gray-50">
+                    <div>
+                        <h2 class="text-xl font-bold text-gray-900">All Transactions</h2>
+                        <p class="text-sm text-gray-500 mt-1">Complete history of all transactions including withdrawals, deposits, and bonuses.</p>
+                    </div>
+                    
+                    <div class="relative w-full md:w-72">
+                        <i class="fa-solid fa-magnifying-glass absolute left-4 top-3.5 text-gray-400"></i>
+                        <input type="text" id="searchInput" placeholder="Search user ID or mobile..." class="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-blue-500 transition">
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto no-scrollbar min-h-[300px]">
+                    <table class="w-full text-left whitespace-nowrap">
+                        <thead class="bg-gray-50/50 text-[11px] font-bold text-gray-500 uppercase tracking-widest border-b border-gray-100">
+                            <tr>
+                                <th class="px-6 py-4">USER INFO</th>
+                                <th class="px-6 py-4">AMOUNT</th>
+                                <th class="px-6 py-4">TYPE</th>
+                                <th class="px-6 py-4">DETAILS</th>
+                                <th class="px-6 py-4 text-right">STATUS</th>
+                            </tr>
+                        </thead>
+                        <tbody id="transactionsTableBody" class="divide-y divide-gray-50 text-sm font-medium text-gray-700">
+                            <tr><td colspan="5" class="p-8 text-center text-gray-400">Loading live data from NexaPay database...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Footer Pagination Status -->
+                <div class="p-4 border-t border-gray-50 flex justify-between items-center text-xs text-gray-500 font-medium bg-white">
+                    <span id="showingText">Showing 0 of 0 transactions</span>
+                    <div class="flex items-center gap-3">
+                        <button class="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center text-gray-400 hover:bg-gray-50 transition cursor-not-allowed"><i class="fa-solid fa-chevron-left"></i></button>
+                        <button class="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center text-gray-400 hover:bg-gray-50 transition cursor-not-allowed"><i class="fa-solid fa-chevron-right"></i></button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('-translate-x-full');
+            document.getElementById('sidebarOverlay').classList.toggle('hidden');
+        }
+    </script>
+
+    <!-- FIREBASE REALTIME SYNC & UNIFIED TRANSACTIONS -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // ADD YOUR REAL FIREBASE CONFIG HERE
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        let unifiedTransactions = [];
+
+        function isToday(date) {
+            const today = new Date();
+            return date.getDate() === today.getDate() && date.getMonth() === today.getMonth() && date.getFullYear() === today.getFullYear();
+        }
+
+        // Search listener
+        document.getElementById('searchInput').addEventListener('input', () => { window.renderTable(); });
+
+        // LIVE FIREBASE LISTENER FUNCTION
+        function setupLiveListeners() {
+            let localWithdrawals = [];
+            let localDeposits = [];
+            let localBonuses = [];
+
+            // Listen to Withdrawals
+            onSnapshot(collection(db, "withdraw_history"), (snap) => {
+                localWithdrawals = [];
+                snap.forEach(doc => localWithdrawals.push(doc.data()));
+                mergeAndRender(localDeposits, localWithdrawals, localBonuses);
+            });
+
+            // Listen to Deposits
+            onSnapshot(collection(db, "deposits"), (snap) => {
+                localDeposits = [];
+                snap.forEach(doc => localDeposits.push(doc.data()));
+                mergeAndRender(localDeposits, localWithdrawals, localBonuses);
+            });
+
+            // Listen to Adjustments/Bonuses (Commission history)
+            onSnapshot(collection(db, "commission_history_logs"), (snap) => {
+                localBonuses = [];
+                snap.forEach(doc => localBonuses.push(doc.data()));
+                mergeAndRender(localDeposits, localWithdrawals, localBonuses);
+            });
+        }
+
+        function mergeAndRender(deposits, withdrawals, bonuses) {
+            unifiedTransactions = [];
+            
+            // Map Real Withdrawals
+            withdrawals.forEach(w => {
+                unifiedTransactions.push({
+                    userId: w.userId || w.userUidTargetKey,
+                    metaInfo: w.upiId || w.method || w.phone || 'N/A',
+                    amount: Number(w.amount),
+                    type: 'Withdrawal',
+                    details: `Manual payout - UTR:\n${w.utr || w.txid || 'N/A'}`,
+                    status: w.status === 'Success' ? 'Completed' : (w.status || 'Pending'),
+                    date: new Date(w.timestamp || Date.now())
+                });
+            });
+
+            // Map Real Deposits
+            deposits.forEach(d => {
+                unifiedTransactions.push({
+                    userId: d.userId || d.userUidTargetKey,
+                    metaInfo: d.phone || 'N/A',
+                    amount: Number(d.amount),
+                    type: 'Deposit',
+                    details: `Via ${d.type || 'N/A'} - UTR:\n${d.utr || d.txid || 'N/A'}`,
+                    status: (d.status === 'Approved' || d.status === 'Success') ? 'Completed' : (d.status || 'Pending'),
+                    date: new Date(d.createdAt || d.timestamp || Date.now())
+                });
+            });
+
+            // Map Real Bonuses/Commissions
+            bonuses.forEach(b => {
+                // Ignore Deductions for "Total Bonus" count, keep only Rewards/Commissions
+                const isDeduction = Number(b.amount || b.commissionEarnedAmount) < 0;
+                unifiedTransactions.push({
+                    userId: b.userId || b.receiverUid,
+                    metaInfo: 'Admin / System',
+                    amount: Math.abs(Number(b.amount || b.commissionEarnedAmount)),
+                    type: isDeduction ? 'Deduction' : 'Bonus',
+                    details: b.title || b.type || 'System Adjustment',
+                    status: 'Completed',
+                    date: new Date(b.timestamp || Date.now())
+                });
+            });
+
+            // Sort by Date DESC (Newest first)
+            unifiedTransactions.sort((a, b) => b.date - a.date);
+
+            // Calc Stats Live
+            let totWith = 0, totBonus = 0, compToday = 0;
+            unifiedTransactions.forEach(t => {
+                if(t.type === 'Withdrawal' && t.status === 'Completed') totWith += t.amount;
+                if(t.type === 'Bonus') totBonus += t.amount;
+                if(t.status === 'Completed' && isToday(t.date)) {
+                    if(t.type === 'Withdrawal') compToday += t.amount;
+                }
+            });
+
+            document.getElementById('statTotalWithdraw').innerText = `₹${totWith.toLocaleString('en-IN')}`;
+            document.getElementById('statTotalBonus').innerText = `₹${totBonus.toLocaleString('en-IN')}`;
+            document.getElementById('statTotalTransactions').innerText = unifiedTransactions.length;
+            document.getElementById('statCompletedToday').innerText = `₹${compToday.toLocaleString('en-IN')}`;
+
+            window.renderTable();
+        }
+
+        window.renderTable = function() {
+            const tbody = document.getElementById('transactionsTableBody');
+            const searchQ = document.getElementById('searchInput').value.toLowerCase();
+            tbody.innerHTML = '';
+
+            let filtered = unifiedTransactions.filter(t => {
+                return (t.userId || '').toLowerCase().includes(searchQ) || (t.metaInfo || '').toLowerCase().includes(searchQ);
+            });
+
+            if(filtered.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="p-8 text-center text-gray-400 text-sm">No transactions match your search.</td></tr>';
+                document.getElementById('showingText').innerText = `Showing 0 of 0 transactions`;
+                return;
+            }
+
+            filtered.forEach(t => {
+                const amtFormatted = `₹${t.amount.toLocaleString('en-IN')}`;
+                
+                // Badge Type formatting
+                let typeBadge = '';
+                if(t.type === 'Withdrawal' || t.type === 'Deduction') typeBadge = `<span class="bg-red-50 text-red-500 px-2.5 py-1 rounded font-bold text-[10px] uppercase tracking-wider">${t.type}</span>`;
+                else if(t.type === 'Bonus') typeBadge = `<span class="bg-yellow-50 text-yellow-600 px-2.5 py-1 rounded font-bold text-[10px] uppercase tracking-wider">${t.type}</span>`;
+                else typeBadge = `<span class="bg-blue-50 text-blue-600 px-2.5 py-1 rounded font-bold text-[10px] uppercase tracking-wider">${t.type}</span>`;
+
+                // Status formatting
+                let statusBadge = '';
+                if(t.status === 'Completed') statusBadge = `<span class="text-green-500 font-bold text-[11px] bg-green-50 px-3 py-1 rounded-full uppercase">${t.status}</span>`;
+                else if(t.status === 'Pending') statusBadge = `<span class="text-orange-500 font-bold text-[11px] bg-orange-50 px-3 py-1 rounded-full uppercase">${t.status}</span>`;
+                else statusBadge = `<span class="text-gray-500 font-bold text-[11px] bg-gray-50 px-3 py-1 rounded-full uppercase">${t.status}</span>`;
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-gray-50/50 transition border-b border-gray-50 last:border-0">
+                        <td class="px-6 py-4">
+                            <div class="font-bold text-gray-900 text-sm">UID: ${t.userId}</div>
+                            <div class="text-[11px] font-medium text-gray-400 mt-0.5">${t.metaInfo}</div>
+                        </td>
+                        <td class="px-6 py-4 font-black text-gray-800">${amtFormatted}</td>
+                        <td class="px-6 py-4">${typeBadge}</td>
+                        <td class="px-6 py-4 text-gray-500 text-xs font-medium leading-relaxed">${t.details.replace('\n', '<br>')}</td>
+                        <td class="px-6 py-4 text-right">${statusBadge}</td>
+                    </tr>
+                `;
+            });
+            
+            document.getElementById('showingText').innerText = `Showing ${filtered.length} of ${unifiedTransactions.length} transactions`;
+        };
+
+        // Initialize Firebase Observers
+        setupLiveListeners();
+        
+    </script>
+</body>
+</html>

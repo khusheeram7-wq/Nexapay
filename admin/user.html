@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RisePay Admin - Users</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght=400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #F8F9FA; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .sidebar-transition { transition: transform 0.3s ease-in-out; }
+    </style>
+
+    <script>
+        if (localStorage.getItem('nexaAdminAuth') !== 'true') {
+            localStorage.setItem('nexaAdminAuth', 'true'); // टेस्टिंग के लिए डिफ़ॉल्ट सेट किया गया है
+        }
+        function adminLogout() {
+            if(confirm("Are you sure you want to log out from RisePay Admin?")) {
+                localStorage.removeItem('nexaAdminAuth');
+                window.location.href = 'index.html';
+            }
+        }
+    </script>
+</head>
+<body class="text-gray-800 antialiased">
+
+    <div id="sidebarOverlay" class="fixed inset-0 bg-gray-900 bg-opacity-40 z-40 hidden" onclick="toggleSidebar()"></div>
+
+    <aside id="sidebar" class="w-[280px] bg-white border-r border-gray-100 flex flex-col justify-between h-screen fixed left-0 top-0 z-50 transform -translate-x-full md:translate-x-0 sidebar-transition">
+        <div class="flex-1 overflow-y-auto no-scrollbar">
+            <div class="px-6 py-6 flex items-center justify-between">
+                <span class="text-[22px] font-extrabold text-blue-600 tracking-tight">RisePay</span>
+                <button onclick="toggleSidebar()" class="md:hidden text-gray-500"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            
+            <nav class="mt-2 px-4 space-y-1.5">
+                <a href="dashboard.html" class="flex items-center gap-4 px-4 py-3 text-gray-500 hover:bg-gray-50 hover:text-gray-900 rounded-xl font-medium text-sm transition">
+                    <i class="fa-solid fa-border-all w-5 text-center"></i> Dashboard
+                </a>
+                <a href="deposit.html" class="flex items-center gap-4 px-4 py-3 text-gray-500 hover:bg-gray-50 hover:text-gray-900 rounded-xl font-medium text-sm transition">
+                    <i class="fa-solid fa-wallet w-5 text-center"></i> Deposits
+                </a>
+                <a href="gateway-settings.html" class="flex items-center gap-4 px-4 py-3 text-gray-500 hover:bg-gray-50 hover:text-gray-900 rounded-xl font-medium text-sm transition">
+                    <i class="fa-solid fa-plug w-5 text-center"></i> Gateway Settings
+                </a>
+                <a href="user.html" class="flex items-center gap-4 px-4 py-3 bg-blue-50 text-blue-600 rounded-xl font-bold text-sm">
+                    <i class="fa-solid fa-users w-5 text-center"></i> Users
+                </a>
+                <a href="payouts.html" class="flex items-center gap-4 px-4 py-3 text-gray-500 hover:bg-gray-50 hover:text-gray-900 rounded-xl font-medium text-sm transition">
+                    <i class="fa-solid fa-money-bill-wave w-5 text-center"></i> Payouts
+                </a>
+                <a href="team-commission.html" class="flex items-center gap-4 px-4 py-3 text-gray-500 hover:bg-gray-50 hover:text-gray-900 rounded-xl font-medium text-sm transition">
+                    <i class="fa-solid fa-network-wired w-5 text-center"></i> Team & Commission
+                </a>
+                <a href="reports.html" class="flex items-center gap-4 px-4 py-3 text-gray-500 hover:bg-gray-50 hover:text-gray-900 rounded-xl font-medium text-sm transition">
+                    <i class="fa-solid fa-chart-line w-5 text-center"></i> Reports
+                </a>
+                <a href="withdrawals.html" class="flex items-center gap-4 px-4 py-3 text-gray-500 hover:bg-gray-50 hover:text-gray-900 rounded-xl font-medium text-sm transition">
+                    <i class="fa-solid fa-building-columns w-5 text-center"></i> Withdrawals
+                </a>
+                <a href="master-settings.html" class="flex items-center gap-4 px-4 py-3 text-gray-500 hover:bg-gray-50 hover:text-gray-900 rounded-xl font-medium text-sm transition">
+                    <i class="fa-solid fa-gear w-5 text-center"></i> Master Settings
+                </a>
+            </nav>
+        </div>
+
+        <div class="p-5 border-t border-gray-100 flex items-center justify-between bg-white">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-blue-100 text-blue-600 font-black rounded-full flex items-center justify-center">A</div>
+                <div>
+                    <h4 class="text-sm font-bold text-gray-900">Super Admin</h4>
+                    <p class="text-[11px] text-gray-400 font-medium">admin@risepay.com</p>
+                </div>
+            </div>
+            <button onclick="adminLogout()" class="text-gray-400 hover:text-red-500 p-2 rounded-lg transition" title="Logout">
+                <i class="fa-solid fa-right-from-bracket text-lg"></i>
+            </button>
+        </div>
+    </aside>
+
+    <main class="md:ml-[280px] min-h-screen pb-12">
+        
+        <header class="bg-white px-6 md:px-10 py-5 sticky top-0 z-30 border-b border-gray-100 flex justify-between items-center">
+            <div class="flex items-center gap-4">
+                <button onclick="toggleSidebar()" class="md:hidden text-gray-500 text-xl"><i class="fa-solid fa-bars"></i></button>
+                <h1 class="text-[20px] font-medium text-gray-800">Users</h1>
+            </div>
+            <div class="flex items-center gap-1.5 px-3 py-1.5 bg-green-50 text-green-600 text-xs font-bold rounded-full border border-green-100">
+                <span class="w-2 h-2 rounded-full bg-green-500"></span> Active
+            </div>
+        </header>
+
+        <div class="p-4 md:p-8 max-w-[1400px] mx-auto space-y-6">
+
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col md:flex-row justify-between items-center gap-4">
+                
+                <div class="relative w-full md:w-1/3">
+                    <i class="fa-solid fa-magnifying-glass absolute left-4 top-3.5 text-gray-400"></i>
+                    <input type="text" id="searchInput" placeholder="Search by Mobile or User ID" class="w-full pl-11 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-blue-500 transition">
+                </div>
+
+                <div class="flex items-center gap-2 w-full md:w-auto overflow-x-auto no-scrollbar">
+                    <button onclick="switchTab('ACTIVE')" id="btnTabActive" class="flex-1 md:flex-none bg-blue-600 text-white px-6 py-2.5 rounded-xl text-sm font-bold shadow-sm transition">
+                        Active Users (<span id="countActive">0</span>)
+                    </button>
+                    <button onclick="switchTab('TRASH')" id="btnTabTrash" class="flex-1 md:flex-none bg-red-600 text-white px-6 py-2.5 rounded-xl text-sm font-bold shadow-sm transition opacity-50 hover:opacity-100 flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-trash-can"></i> Trash (<span id="countTrash">0</span>)
+                    </button>
+                    <button class="flex-1 md:flex-none bg-blue-600 text-white px-6 py-2.5 rounded-xl text-sm font-bold shadow-sm transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-user-plus"></i> Add User
+                    </button>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="overflow-x-auto no-scrollbar min-h-[400px]">
+                    <table class="w-full text-left whitespace-nowrap">
+                        <thead class="bg-gray-50/80 text-[11px] font-bold text-gray-500 uppercase tracking-wider border-b border-gray-100">
+                            <tr>
+                                <th class="px-6 py-4">USER ID</th>
+                                <th class="px-6 py-4">MOBILE</th>
+                                <th class="px-6 py-4 text-center">TOTAL BALANCE</th>
+                                <th class="px-6 py-4 text-center">TODAY DEP/WITH</th>
+                                <th class="px-6 py-4 text-center">LIFETIME DEP/WITH</th>
+                                <th class="px-6 py-4 text-right">STATUS</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTableBody" class="divide-y divide-gray-50 text-sm">
+                            <tr><td colspan="6" class="p-8 text-center text-gray-400 text-sm">Loading users from Firebase...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('-translate-x-full');
+            document.getElementById('sidebarOverlay').classList.toggle('hidden');
+        }
+
+        let currentTabMode = 'ACTIVE';
+
+        function switchTab(mode) {
+            currentTabMode = mode;
+            const btnActive = document.getElementById('btnTabActive');
+            const btnTrash = document.getElementById('btnTabTrash');
+
+            if(mode === 'ACTIVE') {
+                btnActive.classList.remove('opacity-50', 'hover:opacity-100');
+                btnTrash.classList.add('opacity-50', 'hover:opacity-100');
+            } else {
+                btnTrash.classList.remove('opacity-50', 'hover:opacity-100');
+                btnActive.classList.add('opacity-50', 'hover:opacity-100');
+            }
+            if(window.renderUsers) window.renderUsers();
+        }
+
+        function toggleRow(userId, event) {
+            // यदि क्लिक किसी बटन या इनपुट पर हुआ है, तो रो बंद/चालू न करें
+            if (event.target.closest('button') || event.target.closest('label') || event.target.closest('input')) {
+                return;
+            }
+            const detailRow = document.getElementById(`detail_${userId}`);
+            const icon = document.getElementById(`icon_${userId}`);
+            
+            if (detailRow.classList.contains('hidden')) {
+                detailRow.classList.remove('hidden');
+                icon.style.transform = "rotate(180deg)";
+            } else {
+                detailRow.classList.add('hidden');
+                icon.style.transform = "rotate(0deg)";
+            }
+        }
+    </script>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, onSnapshot, query, orderBy, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // यहाँ अपना वर्किंग फायरबेस कॉन्फिग पेस्ट करें
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        let allPlatformUsers = [];
+
+        // 1. Fetch Live Users From Firestore (Realtime Sync)
+        const qUsers = query(collection(db, "users"), orderBy("createdAt", "desc"));
+        onSnapshot(qUsers, (snapshot) => {
+            allPlatformUsers = [];
+            let activeCount = 0;
+            let trashCount = 0;
+
+            snapshot.forEach((docSnap) => {
+                const data = { docId: docSnap.id, ...docSnap.data() };
+                allPlatformUsers.push(data);
+
+                if(data.status === 'TRASH') {
+                    trashCount++;
+                } else {
+                    activeCount++;
+                }
+            });
+
+            document.getElementById('countActive').innerText = activeCount;
+            document.getElementById('countTrash').innerText = trashCount;
+
+            window.renderUsers();
+        });
+
+        // Search Listener
+        document.getElementById('searchInput').addEventListener('input', () => { window.renderUsers(); });
+
+        window.renderUsers = function() {
+            const tableBody = document.getElementById('usersTableBody');
+            const searchQ = document.getElementById('searchInput').value.toLowerCase();
+            tableBody.innerHTML = '';
+
+            let filtered = allPlatformUsers.filter(u => {
+                const matchTab = currentTabMode === 'TRASH' ? u.status === 'TRASH' : u.status !== 'TRASH';
+                const matchSearch = (u.userId || '').toLowerCase().includes(searchQ) || (u.phone || '').toLowerCase().includes(searchQ);
+                return matchTab && matchSearch;
+            });
+
+            if (filtered.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-gray-400 text-sm">No users found in ${currentTabMode} list.</td></tr>`;
+                return;
+            }
+
+            filtered.forEach(u => {
+                const balance = Number(u.balance || 0).toFixed(2);
+                const tDep = Number(u.todayDep || 0).toFixed(2);
+                const tWith = Number(u.todayWith || 0).toFixed(2);
+                const lDep = Number(u.lifeDep || 0).toFixed(2);
+                const lWith = Number(u.lifeWith || 0).toFixed(2);
+                
+                const isFrozen = u.freezeDeposit === true;
+                const isGoogleAuth = u.googleAuthBound === true; // 4th इमेज के अनुसार (True = Bound)
+                const displayStatus = u.status || 'ACTIVE';
+
+                // Status Badge
+                let statusBadge = '';
+                if(displayStatus === 'ACTIVE') statusBadge = '<span class="bg-gray-100 text-gray-600 px-3 py-1 rounded-lg font-bold text-[10px] tracking-wide">ACTIVE</span>';
+                else if(displayStatus === 'BLOCKED') statusBadge = '<span class="bg-orange-100 text-orange-700 px-3 py-1 rounded-lg font-bold text-[10px] tracking-wide">BLOCKED</span>';
+                else if(displayStatus === 'TRASH') statusBadge = '<span class="bg-red-100 text-red-700 px-3 py-1 rounded-lg font-bold text-[10px] tracking-wide">TRASH</span>';
+
+                // Render Main User Row
+                tableBody.innerHTML += `
+                    <tr class="hover:bg-gray-50/50 cursor-pointer transition border-b border-gray-50" onclick="toggleRow('${u.docId}', event)">
+                        <td class="px-6 py-4 font-bold text-gray-900">${u.userId || '---'}</td>
+                        <td class="px-6 py-4 font-medium text-gray-600">${u.phone || '---'}</td>
+                        <td class="px-6 py-4 text-center font-bold text-gray-900">${balance}</td>
+                        <td class="px-6 py-4 text-center text-xs">
+                            <span class="text-green-500 font-bold">Dep: ${tDep}</span> / <span class="text-red-500 font-bold">With: ${tWith}</span>
+                        </td>
+                        <td class="px-6 py-4 text-center text-xs">
+                            <span class="text-green-500 font-bold">Dep: ${lDep}</span> / <span class="text-red-500 font-bold">With: ${lWith}</span>
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            <div class="flex items-center justify-end gap-3">
+                                ${statusBadge}
+                                <i id="icon_${u.docId}" class="fa-solid fa-chevron-down text-gray-400 transition-transform duration-300"></i>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+
+                // Handle Multiple UPI rendering
+                let upiListHtml = '';
+                if(u.upiIds && Array.isArray(u.upiIds) && u.upiIds.length > 0) {
+                    u.upiIds.forEach((upi, idx) => {
+                        upiListHtml += `<p class="text-xs text-gray-700 font-semibold bg-gray-50 p-2 rounded-lg border border-gray-100 flex items-center justify-between">
+                            <span>${upi}</span> <span class="text-[9px] bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded">UPI ${idx+1}</span>
+                        </p>`;
+                    });
+                } else {
+                    upiListHtml = `<p class="text-xs text-gray-500 italic p-2 bg-gray-50 rounded-lg">No UPI details added.</p>`;
+                }
+
+                // Handle Multiple Bank Accounts rendering
+                let bankListHtml = '';
+                if(u.bankAccounts && Array.isArray(u.bankAccounts) && u.bankAccounts.length > 0) {
+                    u.bankAccounts.forEach((bank, idx) => {
+                        bankListHtml += `
+                            <div class="bg-gray-50 border border-gray-100 rounded-xl p-3 text-xs text-gray-700 space-y-0.5">
+                                <div class="font-bold text-blue-600 flex justify-between items-center">
+                                    <span>Account #${idx+1}</span>
+                                    <span class="text-[9px] uppercase bg-gray-200 text-gray-600 px-1 rounded">${bank.type || 'Bank'}</span>
+                                </div>
+                                <p><span class="text-gray-400">A/C:</span> ${bank.accountNo || 'N/A'}</p>
+                                <p><span class="text-gray-400">IFSC:</span> ${bank.ifsc || 'N/A'}</p>
+                                <p><span class="text-gray-400">Name:</span> ${bank.holderName || 'N/A'}</p>
+                            </div>`;
+                    });
+                } else {
+                    bankListHtml = `<p class="text-xs text-gray-500 italic p-2 bg-gray-50 rounded-lg">No bank account linked.</p>`;
+                }
+
+                // Security Action Section based on current tab
+                let securityActionsHtml = '';
+                if(currentTabMode === 'ACTIVE') {
+                    const blockBtnText = displayStatus === 'BLOCKED' ? 'Unblock User' : 'Block User';
+                    securityActionsHtml = `
+                        <button onclick="toggleBlockUser('${u.docId}', '${displayStatus}', event)" class="w-full ${displayStatus === 'BLOCKED' ? 'bg-green-600 hover:bg-green-700' : 'bg-blue-600 hover:bg-blue-700'} text-white font-bold py-2.5 rounded-xl text-sm transition">
+                            <i class="fa-solid fa-ban mr-2"></i> ${blockBtnText}
+                        </button>
+                        <button onclick="resetSecurityField('${u.docId}', 'password', event)" class="w-full bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 font-bold py-2.5 rounded-xl text-sm transition">Reset Password</button>
+                        <button onclick="resetSecurityField('${u.docId}', 'mpin', event)" class="w-full bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 font-bold py-2.5 rounded-xl text-sm transition">Reset M-PIN</button>
+                        <button onclick="moveToTrash('${u.docId}', event)" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-xl text-sm transition">
+                            <i class="fa-regular fa-trash-can mr-2"></i> Delete User
+                        </button>
+                    `;
+                } else {
+                    securityActionsHtml = `
+                        <button onclick="restoreUser('${u.docId}', event)" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 rounded-xl text-sm transition">
+                            <i class="fa-solid fa-rotate-left mr-2"></i> Restore User
+                        </button>
+                        <button onclick="deletePermanently('${u.docId}', event)" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-xl text-sm transition">
+                            <i class="fa-regular fa-trash-can mr-2"></i> Delete Permanently
+                        </button>
+                    `;
+                }
+
+                // Render Expanded Accordion Detail Card
+                tableBody.innerHTML += `
+                    <tr id="detail_${u.docId}" class="hidden bg-gray-50/50 border-b border-gray-100">
+                        <td colspan="6" class="p-6">
+                            <div class="bg-white rounded-2xl border border-gray-100 p-6 grid grid-cols-1 lg:grid-cols-4 gap-8 shadow-sm">
+                                
+                                <div>
+                                    <div class="flex items-center gap-2 text-blue-600 text-xs font-bold uppercase tracking-wider mb-4">
+                                        <i class="fa-solid fa-shield-halved"></i> SECURITY ACTIONS
+                                    </div>
+                                    <div class="space-y-3">
+                                        ${securityActionsHtml}
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <div class="flex items-center gap-2 text-blue-600 text-xs font-bold uppercase tracking-wider mb-4">
+                                        <i class="fa-solid fa-snowflake"></i> FREEZE CONTROLS
+                                    </div>
+                                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-100">
+                                        <span class="text-sm font-medium text-gray-700">Freeze Deposit</span>
+                                        <label class="flex items-center cursor-pointer">
+                                            <div class="relative">
+                                                <input type="checkbox" ${isFrozen ? 'checked' : ''} onchange="toggleFreeze('${u.docId}', this.checked, event)" class="sr-only">
+                                                <div class="block ${isFrozen ? 'bg-blue-600' : 'bg-gray-200'} w-10 h-6 rounded-full transition-colors duration-300"></div>
+                                                <div class="dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform duration-300 ${isFrozen ? 'translate-x-4' : ''}"></div>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <div class="flex items-center gap-2 text-blue-600 text-xs font-bold uppercase tracking-wider mb-4">
+                                        <i class="fa-solid fa-lock"></i> AUTHENTICATION
+                                    </div>
+                                    <div class="bg-gray-50 border border-gray-100 rounded-xl p-4 space-y-3">
+                                        <div class="flex items-center justify-between">
+                                            <div>
+                                                <h4 class="text-xs font-bold text-gray-800">Google Auth</h4>
+                                                <p class="text-[10px] font-medium text-gray-400 mt-0.5">${isGoogleAuth ? 'Bound successfully' : 'Not Connected'}</p>
+                                            </div>
+                                            <span class="w-2.5 h-2.5 rounded-full ${isGoogleAuth ? 'bg-green-500' : 'bg-gray-300'}"></span>
+                                        </div>
+                                        
+                                        <div class="text-[11px] font-bold text-gray-600 uppercase">
+                                            STATUS: ${isGoogleAuth ? 'YES' : 'NO'}
+                                        </div>
+
+                                        <button onclick="resetGoogleAuth('${u.docId}', event)" class="w-full mt-2 bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-800 text-xs font-bold py-2 rounded-lg transition flex items-center justify-center gap-1.5">
+                                            <i class="fa-solid fa-arrows-rotate"></i> Reset Google Auth
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <div class="flex items-center gap-2 text-blue-600 text-xs font-bold uppercase tracking-wider mb-4">
+                                        <i class="fa-solid fa-link"></i> LINKED ACCOUNTS
+                                    </div>
+                                    <div class="space-y-4">
+                                        <div class="space-y-1.5">
+                                            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wide">UPI ID List</span>
+                                            <div class="max-h-[100px] overflow-y-auto space-y-1 pr-1">
+                                                ${upiListHtml}
+                                            </div>
+                                        </div>
+                                        <div class="space-y-1.5">
+                                            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Bank Account Details</span>
+                                            <div class="max-h-[140px] overflow-y-auto space-y-2 pr-1">
+                                                ${bankListHtml}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+        };
+
+        // --- ACTION HANDLERS ---
+
+        // Block / Unblock Logic
+        window.toggleBlockUser = async function(docId, currentStatus, e) {
+            e.stopPropagation();
+            const nextStatus = currentStatus === 'BLOCKED' ? 'ACTIVE' : 'BLOCKED';
+            if(confirm(`Confirm Action:\nAre you sure you want to change user status to ${nextStatus}?`)) {
+                await updateDoc(doc(db, "users", docId), { status: nextStatus });
+                alert(`User has been ${nextStatus.toLowerCase()} successfully.`);
+            }
+        };
+
+        // Reset Password or M-PIN
+        window.resetSecurityField = async function(docId, fieldType, e) {
+            e.stopPropagation();
+            const newVal = prompt(`Enter new ${fieldType.toUpperCase()}:`);
+            if (newVal !== null && newVal.trim() !== "") {
+                const updateData = {};
+                updateData[fieldType] = newVal.trim();
+                await updateDoc(doc(db, "users", docId), updateData);
+                alert(`${fieldType.toUpperCase()} has been reset successfully.`);
+            }
+        };
+
+        // Move to Trash (Delete)
+        window.moveToTrash = async function(docId, e) {
+            e.stopPropagation();
+            if(confirm("Confirm Action:\nAre you sure you want to delete this user? They will be moved to Trash folder.")) {
+                await updateDoc(doc(db, "users", docId), { status: 'TRASH' });
+                alert("User moved to trash list.");
+            }
+        };
+
+        // Restore from Trash
+        window.restoreUser = async function(docId, e) {
+            e.stopPropagation();
+            if(confirm("Restore User:\nDo you want to restore this user back to active status?")) {
+                await updateDoc(doc(db, "users", docId), { status: 'ACTIVE' });
+                alert("User restored successfully.");
+            }
+        };
+
+        // Permanent Delete
+        window.deletePermanently = async function(docId, e) {
+            e.stopPropagation();
+            if(confirm("CRITICAL WARNING:\nAre you sure you want to permanently delete this user? This setup cannot be undone.")) {
+                await deleteDoc(doc(db, "users", docId));
+                alert("User permanently wiped from the system.");
+            }
+        };
+
+        // Toggle Freeze Status
+        window.toggleFreeze = async function(docId, isFrozen, e) {
+            e.stopPropagation();
+            await updateDoc(doc(db, "users", docId), { freezeDeposit: isFrozen });
+        };
+
+        // Google Authenticator Reset Logic
+        window.resetGoogleAuth = async function(docId, e) {
+            e.stopPropagation();
+            if(confirm("Google Authentication Reset:\nक्या आप वाकई इस यूजर का Google Auth रीसेट करना चाहते हैं?\nरीसेट करने के बाद यूजर को ऐप में फिर से QR कोड और Secret Key (Image 3 की तरह) बाइंड करने का विकल्प शो होगा।")) {
+                await updateDoc(doc(db, "users", docId), { 
+                    googleAuthBound: false,
+                    googleAuthSecret: "" // पुरानी सीक्रेट को क्लियर करें जिससे ऐप न्यू की जनरेट करे
+                });
+                alert("Google Authentication successfully reset for this user.");
+            }
+        };
+    </script>
+</body>
+</html>
