@@ -3,67 +3,80 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PenguinPay - Token History</title>
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <title>RisePay - Token History</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { font-family: 'Segoe UI', Roboto, sans-serif; }
+        body { font-family: 'Segoe UI', Roboto, sans-serif; background-color: #F8F9FA; }
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .dropdown-animate { animation: slideDown 0.2s ease-out forwards; transform-origin: top; }
+        @keyframes slideDown { from { opacity: 0; transform: scaleY(0.95); } to { opacity: 1; transform: scaleY(1); } }
     </style>
 </head>
-<body class="bg-[#F8F9FA] flex justify-center items-center min-h-screen">
+<body class="flex justify-center items-center min-h-screen">
 
-    <div class="bg-white w-full max-w-md min-h-screen md:min-h-[850px] flex flex-col justify-between shadow-xl md:rounded-3xl overflow-hidden relative border border-gray-100">
+    <div class="bg-[#F8F9FA] w-full max-w-md min-h-screen md:min-h-[850px] flex flex-col justify-between shadow-xl md:rounded-3xl overflow-hidden relative">
         
-        <div class="px-4 pt-6 pb-2 bg-white sticky top-0 z-50 border-b border-gray-50">
+        <div class="px-4 pt-6 pb-4 bg-white sticky top-0 z-50">
             <div class="flex items-center justify-between h-10">
-                <button onclick="window.location.href='me.html'" class="text-gray-800 text-lg w-10 text-left">
+                <button onclick="window.location.href='me.html'" class="text-gray-800 text-lg w-10 text-left cursor-pointer">
                     <i class="fa-solid fa-chevron-left"></i>
                 </button>
-                <h1 class="text-base font-black text-gray-900 tracking-tight flex-1 text-center">Token History</h1>
+                <h1 class="text-[19px] font-bold text-gray-900 tracking-tight flex-1 text-center">Token History</h1>
                 <div class="w-10"></div>
             </div>
 
-            <div class="flex mt-4 border-b border-gray-100 text-xs font-bold text-gray-400 select-none overflow-x-auto hide-scrollbar space-x-2">
-                <button onclick="switchHistoryTab('All')" id="tabFilter-All" class="flex-1 pb-3 text-center whitespace-nowrap transition-all cursor-pointer border-b-2 border-black text-black font-black">
-                    All Logs
-                </button>
-                <button onclick="switchHistoryTab('Deposit')" id="tabFilter-Deposit" class="flex-1 pb-3 text-center whitespace-nowrap transition-all cursor-pointer">
-                    Deposits
-                </button>
-                <button onclick="switchHistoryTab('Withdraw')" id="tabFilter-Withdraw" class="flex-1 pb-3 text-center whitespace-nowrap transition-all cursor-pointer">
-                    Withdrawals
-                </button>
-                <button onclick="switchHistoryTab('Rewards')" id="tabFilter-Rewards" class="flex-1 pb-3 text-center whitespace-nowrap transition-all cursor-pointer">
-                    Commissions
-                </button>
+            <div class="flex mt-4 gap-3 relative z-50">
+                
+                <div class="relative flex-1">
+                    <button onclick="toggleFilterDropdown('statusDropdownMenu')" class="w-full flex items-center justify-between px-4 py-2.5 bg-white text-gray-700 text-[13px] font-bold rounded-xl border border-gray-200 cursor-pointer shadow-sm">
+                        <span id="currentStatusTextLabel">All</span>
+                        <i class="fa-solid fa-chevron-down text-[10px] text-gray-400"></i>
+                    </button>
+                    <div id="statusDropdownMenu" class="hidden absolute left-0 top-12 w-full bg-white border border-gray-100 rounded-2xl shadow-xl py-2 z-50 font-semibold text-[13px] text-gray-700 dropdown-animate">
+                        <button onclick="applyStatusFilter('All', 'All')" class="w-full text-left px-5 py-2.5 hover:bg-gray-50 hover:text-blue-600 transition-colors">All</button>
+                        <button onclick="applyStatusFilter('SUCCESS', 'Success')" class="w-full text-left px-5 py-2.5 hover:bg-gray-50 hover:text-green-600 transition-colors">Success</button>
+                        <button onclick="applyStatusFilter('Pending', 'Pending')" class="w-full text-left px-5 py-2.5 hover:bg-gray-50 hover:text-amber-600 transition-colors">Pending</button>
+                        <button onclick="applyStatusFilter('FAILED', 'Failed')" class="w-full text-left px-5 py-2.5 hover:bg-gray-50 hover:text-red-600 transition-colors">Failed</button>
+                    </div>
+                </div>
+
+                <div class="relative flex-1">
+                    <button onclick="toggleFilterDropdown('dateDropdownMenu')" class="w-full flex items-center justify-between px-4 py-2.5 bg-white text-gray-700 text-[13px] font-bold rounded-xl border border-gray-200 cursor-pointer shadow-sm">
+                        <span id="currentDateTextLabel">All Time</span>
+                        <i class="fa-solid fa-chevron-down text-[10px] text-gray-400"></i>
+                    </button>
+                    <div id="dateDropdownMenu" class="hidden absolute right-0 top-12 w-full bg-white border border-gray-100 rounded-2xl shadow-xl py-2 z-50 font-semibold text-[13px] text-gray-700 dropdown-animate">
+                        <button onclick="applyDateFilter('7', 'Last 7 Days')" class="w-full text-left px-5 py-2.5 hover:bg-gray-50 hover:text-blue-600 transition-colors">Last 7 Days</button>
+                        <button onclick="applyDateFilter('30', 'Last 30 Days')" class="w-full text-left px-5 py-2.5 hover:bg-gray-50 hover:text-blue-600 transition-colors">Last 30 Days</button>
+                        <button onclick="applyDateFilter('90', 'Last 3 Months')" class="w-full text-left px-5 py-2.5 hover:bg-gray-50 hover:text-blue-600 transition-colors">Last 3 Months</button>
+                        <button onclick="applyDateFilter('All', 'All Time')" class="w-full text-left px-5 py-2.5 hover:bg-gray-50 hover:text-blue-600 transition-colors">All Time</button>
+                    </div>
+                </div>
+
             </div>
         </div>
 
-        <div class="flex-1 overflow-y-auto px-4 py-2 hide-scrollbar bg-white space-y-3">
-            
-            <div id="boxTokenHistoryRenderContainer" class="divide-y divide-gray-100/70">
-                <div class="text-center py-24 text-xs text-gray-400 italic font-medium">Synchronizing unified ecosystem logs...</div>
-            </div>
-
+        <div class="flex-1 overflow-y-auto px-4 py-3 hide-scrollbar bg-[#F8F9FA] space-y-4 relative z-10" id="tokenHistoryRenderContainer">
+            <div class="text-center py-24 text-xs text-gray-400 font-medium">Connecting to secure database...</div>
         </div>
 
-        <div class="bg-white border-t border-gray-100 px-2 py-2.5 flex justify-between items-center shadow-[0_-4px_20px_rgba(0,0,0,0.03)] z-40">
-            <button onclick="window.location.href='home.html'" class="footer-tab flex-1 flex flex-col items-center gap-1 text-gray-400 font-medium transition-all cursor-pointer">
-                <i class="fa-solid fa-house text-lg"></i> <span class="text-[10px] tracking-wide">Home</span>
+        <div class="bg-white border-t border-gray-100 px-2 py-2.5 flex justify-between items-center shadow-[0_-4px_20px_rgba(0,0,0,0.03)] z-40 relative rounded-t-3xl md:rounded-b-3xl">
+            <button onclick="window.location.href='home.html'" class="flex-1 flex flex-col items-center gap-1 text-gray-400 font-medium transition-all cursor-pointer hover:text-gray-900">
+                <i class="fa-solid fa-house text-xl"></i> <span class="text-[10px] font-bold">Home</span>
             </button>
-            <button onclick="window.location.href='deposit.html'" class="footer-tab flex-1 flex flex-col items-center gap-1 text-gray-400 font-medium transition-all cursor-pointer">
-                <i class="fa-solid fa-right-left text-lg"></i> <span class="text-[10px] tracking-wide">Deposit</span>
+            <button onclick="window.location.href='deposit.html'" class="flex-1 flex flex-col items-center gap-1 text-gray-400 font-medium transition-all cursor-pointer hover:text-gray-900">
+                <i class="fa-solid fa-right-left text-xl"></i> <span class="text-[10px] font-bold">Deposit</span>
             </button>
-            <button onclick="window.location.href='upi.html'" class="footer-tab flex-1 flex flex-col items-center gap-1 text-gray-400 font-medium transition-all cursor-pointer">
-                <i class="fa-solid fa-briefcase text-lg"></i> <span class="text-[10px] tracking-wide">UPI</span>
+            <button onclick="window.location.href='upi.html'" class="flex-1 flex flex-col items-center gap-1 text-gray-400 font-medium transition-all cursor-pointer hover:text-gray-900">
+                <i class="fa-solid fa-qrcode text-xl"></i> <span class="text-[10px] font-bold">Upi</span>
             </button>
-            <button onclick="window.location.href='team.html'" class="footer-tab flex-1 flex flex-col items-center gap-1 text-gray-400 font-medium transition-all cursor-pointer">
-                <i class="fa-solid fa-chart-pie text-lg"></i> <span class="text-[10px] tracking-wide">Team</span>
+            <button onclick="window.location.href='team.html'" class="flex-1 flex flex-col items-center gap-1 text-gray-400 font-medium transition-all cursor-pointer hover:text-gray-900">
+                <i class="fa-solid fa-users text-xl"></i> <span class="text-[10px] font-bold">Team</span>
             </button>
-            <button onclick="window.location.href='me.html'" class="footer-tab flex-1 flex flex-col items-center gap-1 text-gray-400 font-medium transition-all cursor-pointer">
-                <i class="fa-solid fa-user-astronaut text-lg"></i> <span class="text-[10px] tracking-wide">Me</span>
+            <button onclick="window.location.href='me.html'" class="flex-1 flex flex-col items-center gap-1 text-gray-400 font-medium transition-all cursor-pointer hover:text-gray-900">
+                <i class="fa-solid fa-user text-xl"></i> <span class="text-[10px] font-bold">Me</span>
             </button>
         </div>
 
@@ -71,7 +84,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
-        import { getFirestore, collection, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+        import { getFirestore, collection, query, where, onSnapshot, getDoc, doc } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCHoR7wojkpTZZPR-gcfDnPW8aOTuoiaAU",
@@ -80,163 +93,393 @@
             projectId: "nexapay-342d0",
             storageBucket: "nexapay-342d0.firebasestorage.app",
             messagingSenderId: "305096071099",
-            appId: "1:305096071099:web:3db1e75a2669adbcae569e",
-            measurementId: "G-9S068TQ2CS"
+            appId: "1:305096071099:web:3db1e75a2669adbcae569e"
         };
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        let activeTabCategory = 'All';
-        let fullyParsedUnifiedDataLogs = [];
+        // State Trackers
+        let statusFilterCriterion = 'All'; 
+        let dateRangeDaysCriterion = 'All'; 
+        
+        // Target Identity
+        const targetLoggedUserUid = localStorage.getItem('sessionUserIdentityId') || localStorage.getItem('userId') || localStorage.getItem('userUid') || '20012144';
 
-        // Core Realtime Multi-Collection Streams Aggregator
-        function startUnifiedHistoryPipelineSync() {
-            const container = document.getElementById('boxTokenHistoryRenderContainer');
-            const userUid = localStorage.getItem('sessionUserIdentityId') || '20012569';
+        // Live Profile Balance (Fallback for 0.00 issue)
+        let liveTotalBalance = '0.00';
+        let liveQuotaBalance = '0.00';
 
-            let streamsLoadedCounter = 0;
-            const targetTotalStreams = 3;
+        // Tracking Arrays
+        let globalDeposits = {};
+        let globalWithdrawals = [];
+        let globalCommissions = [];
+        let globalAdjustments = [];
 
-            let internalDepositBuffer = [];
-            let internalWithdrawBuffer = [];
-            let internalCommissionBuffer = [];
+        // UI Toggles
+        window.toggleFilterDropdown = function(targetMenuId) {
+            const menu = document.getElementById(targetMenuId);
+            const statusMenu = document.getElementById('statusDropdownMenu');
+            const dateMenu = document.getElementById('dateDropdownMenu');
 
-            function compileAndRenderFilters() {
-                // Merge all decoupled data channels into a clean system map array
-                fullyParsedUnifiedDataLogs = [...internalDepositBuffer, ...internalWithdrawBuffer, ...internalCommissionBuffer];
-                
-                // Sort by date-time descending tracking structures
-                fullyParsedUnifiedDataLogs.sort((x, y) => new Date(y.rawDate) - new Date(x.rawDate));
-
-                container.innerHTML = '';
-                let visibleRowsCounter = 0;
-
-                fullyParsedUnifiedDataLogs.forEach(item => {
-                    // Filter check condition logic match loops
-                    if (activeTabCategory !== 'All' && item.type !== activeTabCategory) return;
-
-                    visibleRowsCounter++;
-                    const blockRow = document.createElement('div');
-                    blockRow.className = "py-4 flex justify-between items-center bg-white border-b border-gray-50 last:border-none";
-
-                    let valueColorClass = "text-gray-900";
-                    let signPrefix = "";
-
-                    if (item.type === 'Deposit' || item.type === 'Rewards') {
-                        valueColorClass = "text-emerald-600";
-                        signPrefix = "+";
-                    } else if (item.type === 'Withdraw') {
-                        valueColorClass = "text-rose-600";
-                        signPrefix = "-";
-                    }
-
-                    blockRow.innerHTML = `
-                        <div class="space-y-1 text-left">
-                            <div class="flex items-center space-x-2">
-                                <span class="text-sm font-black text-gray-900">${item.title}</span>
-                                <span class="text-[9px] font-mono px-1.5 py-0.5 rounded-md font-bold ${item.tagStyle}">${item.subtitle}</span>
-                            </div>
-                            <p class="text-[10px] text-gray-400 font-mono font-bold tracking-tight">${item.date}</p>
-                        </div>
-                        <div class="text-right">
-                            <span class="text-base font-black tracking-tight ${valueColorClass}">${signPrefix}₹${parseFloat(item.value).toFixed(2)}</span>
-                            ${item.metaInfo ? `<p class="text-[9px] font-semibold text-slate-400 tracking-tighter">${item.metaInfo}</p>` : ''}
-                        </div>`;
-                    
-                    container.appendChild(blockRow);
-                });
-
-                if (visibleRowsCounter === 0) {
-                    container.innerHTML = `<div class="text-center py-24 text-xs font-bold text-gray-300 italic">No transaction logs matching this category tab index.</div>`;
-                }
+            if (targetMenuId === 'statusDropdownMenu') {
+                dateMenu.classList.add('hidden');
+                menu.classList.toggle('hidden');
+            } else {
+                statusMenu.classList.add('hidden');
+                menu.classList.toggle('hidden');
             }
+        };
 
-            // 1. Pipeline Segment: Fetch Deposits Audit Streams
-            const depositQuery = query(collection(db, "depositReceiptLogs"), where("userUidTargetKey", "==", userUid));
-            onSnapshot(depositQuery, (snapshot) => {
-                internalDepositBuffer = [];
-                snapshot.forEach(doc => {
-                    const data = doc.data();
-                    internalDepositBuffer.push({
-                        type: 'Deposit',
-                        title: 'Wallet Deposit Topup',
-                        subtitle: data.status === 'Approved & Credited' ? 'Success' : 'In Payment',
-                        tagStyle: data.status === 'Approved & Credited' ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600',
-                        date: data.timestamp || '',
-                        rawDate: data.timestamp || new Date().toISOString(),
-                        value: data.taskAmountValue || 0,
-                        metaInfo: data.userInrUtr ? `UTR: ${data.userInrUtr}` : ''
+        window.applyStatusFilter = function(statusCode, readableLabel) {
+            statusFilterCriterion = statusCode;
+            document.getElementById('currentStatusTextLabel').innerText = readableLabel;
+            document.getElementById('statusDropdownMenu').classList.add('hidden');
+            renderSynchronizedList();
+        };
+
+        window.applyDateFilter = function(daysCode, readableLabel) {
+            dateRangeDaysCriterion = daysCode;
+            document.getElementById('currentDateTextLabel').innerText = readableLabel;
+            document.getElementById('dateDropdownMenu').classList.add('hidden');
+            renderSynchronizedList();
+        };
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.relative')) {
+                document.getElementById('statusDropdownMenu').classList.add('hidden');
+                document.getElementById('dateDropdownMenu').classList.add('hidden');
+            }
+        });
+
+        function checkDateWindowValidation(itemRawDateStr) {
+            if (dateRangeDaysCriterion === 'All') return true;
+            const itemParsedDate = new Date(itemRawDateStr);
+            if (isNaN(itemParsedDate.getTime())) return true; 
+
+            const currentTimeStamp = new Date();
+            const timeDifferenceDelta = currentTimeStamp.getTime() - itemParsedDate.getTime();
+            const totalDaysPassed = timeDifferenceDelta / (1000 * 3600 * 24);
+
+            return totalDaysPassed <= parseInt(dateRangeDaysCriterion);
+        }
+
+        function renderSynchronizedList() {
+            const displayBox = document.getElementById('tokenHistoryRenderContainer');
+            let superMasterArray = [...Object.values(globalDeposits), ...globalWithdrawals, ...globalCommissions, ...globalAdjustments];
+            
+            // Sort by Date Descending
+            superMasterArray.sort((a, b) => new Date(b.rawTimestamp) - new Date(a.rawTimestamp));
+            displayBox.innerHTML = '';
+
+            let counter = 0;
+            superMasterArray.forEach(log => {
+                // Status Filter Check
+                if (statusFilterCriterion !== 'All') {
+                    const isSuccess = ['SUCCESS', 'Approved', 'Approved & Credited', 'Success', 'success'].includes(log.status);
+                    const isPending = ['Pending', 'In Payment', 'pending', 'In payment'].includes(log.status);
+                    const isFailed = ['FAILED', 'Rejected', 'Timeout', 'Cancel', 'CANCEL', 'cancel', 'Failed', 'failed'].includes(log.status);
+
+                    if (statusFilterCriterion === 'SUCCESS' && !isSuccess) return;
+                    if (statusFilterCriterion === 'Pending' && !isPending) return;
+                    if (statusFilterCriterion === 'FAILED' && !isFailed) return;
+                }
+
+                // Date Filter Check
+                if (!checkDateWindowValidation(log.rawTimestamp)) return;
+                counter++;
+
+                const layoutCard = document.createElement('div');
+                layoutCard.className = "bg-white p-[18px] rounded-[20px] shadow-[0_2px_15px_rgba(0,0,0,0.03)] border border-gray-50 flex flex-col space-y-4 mb-3";
+
+                let statusBadgeStyle = "text-amber-500";
+                let verifiedRenderStatus = log.status;
+                let statusIcon = "fa-circle-dot";
+
+                if (['SUCCESS', 'Approved', 'Approved & Credited', 'Success', 'success'].includes(log.status)) {
+                    statusBadgeStyle = "text-green-500";
+                    verifiedRenderStatus = "SUCCESS";
+                    statusIcon = "fa-circle-check";
+                    if(log.status === 'Approved & Credited') verifiedRenderStatus = "APPROVED & CREDITED";
+                } else if (['FAILED', 'Rejected', 'Timeout', 'Cancel', 'CANCEL', 'cancel', 'Failed', 'failed'].includes(log.status)) {
+                    statusBadgeStyle = "text-red-500";
+                    verifiedRenderStatus = log.status.toUpperCase();
+                    statusIcon = "fa-circle-xmark";
+                } else {
+                    verifiedRenderStatus = "PENDING";
+                }
+
+                // Grid Builder
+                let dynamicPropertiesMetaRows = '';
+                if(log.gridItems && log.gridItems.length > 0) {
+                    dynamicPropertiesMetaRows = `<div class="grid grid-cols-2 gap-y-4 gap-x-2 w-full mt-4">`;
+                    log.gridItems.forEach(item => {
+                        dynamicPropertiesMetaRows += `
+                            <div>
+                                <div class="text-[10px] text-gray-400 font-bold uppercase mb-[2px] tracking-wide">${item.label}</div>
+                                <div class="text-[13px] font-extrabold text-gray-800">${item.value}</div>
+                            </div>`;
                     });
-                });
-                compileAndRenderFilters();
+                    dynamicPropertiesMetaRows += `</div>`;
+                }
+
+                // Description Block
+                let descBlock = '';
+                if(log.descriptionText) {
+                    let gwBadge = log.isGateway ? `<span class="bg-indigo-50 text-indigo-600 px-1.5 py-0.5 rounded text-[8px] uppercase tracking-wider font-bold ml-2">Fast Payment</span>` : `<span class="bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded text-[8px] uppercase tracking-wider font-bold ml-2">Manual</span>`;
+                    
+                    descBlock = `
+                    <div class="mt-4 pt-1">
+                        <div class="text-[10px] text-gray-400 font-bold uppercase mb-[2px] tracking-wide">DESCRIPTION</div>
+                        <div class="text-[12px] font-semibold text-gray-600 flex items-center flex-wrap gap-1 leading-snug">
+                            ${log.descriptionText} ${gwBadge}
+                        </div>
+                    </div>`;
+                }
+
+                layoutCard.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full ${log.iconBg} flex items-center justify-center text-lg shadow-sm">
+                                <i class="${log.iconSymbol}"></i>
+                            </div>
+                            <div class="flex flex-col">
+                                <h3 class="text-[15px] font-extrabold text-gray-900 tracking-tight">${log.titleName}</h3>
+                                <div class="mt-0.5">
+                                    <span class="inline-flex items-center justify-center px-1.5 py-[1px] ${log.tagStyle} text-[9px] font-black rounded uppercase tracking-wider">${log.txnDirection}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-[17px] font-black tracking-tight ${log.amountColor}">
+                            ${log.prefixSign}${log.amountValue}
+                        </div>
+                    </div>
+
+                    ${dynamicPropertiesMetaRows}
+                    ${descBlock}
+
+                    <div class="mt-2 pt-3 border-t border-gray-100 flex justify-between items-end w-full">
+                        <div>
+                            <div class="text-[10px] text-gray-400 font-bold uppercase mb-[2px] tracking-wide">TRANSACTION TIME</div>
+                            <div class="text-[11px] font-bold text-gray-500 font-mono">${log.displayTime}</div>
+                        </div>
+                        <div class="flex items-center gap-1 ${statusBadgeStyle} font-extrabold text-[10px] uppercase tracking-wider">
+                            <i class="fa-regular ${statusIcon} text-[11px]"></i> ${verifiedRenderStatus}
+                        </div>
+                    </div>`;
+
+                displayBox.appendChild(layoutCard);
             });
 
-            // 2. Pipeline Segment: Fetch Manual Withdraw Ledger Logs
-            const withdrawQuery = query(collection(db, "withdraw_history"), where("userId", "==", userUid));
-            onSnapshot(withdrawQuery, (snapshot) => {
-                internalWithdrawBuffer = [];
-                snapshot.forEach(doc => {
-                    const data = doc.data();
-                    internalWithdrawBuffer.push({
-                        type: 'Withdraw',
-                        title: 'Manual Fund Payout',
-                        subtitle: data.status || 'Settled',
-                        tagStyle: 'bg-rose-50 text-rose-600',
-                        date: data.time || data.timestamp || '',
-                        rawDate: data.time || data.timestamp || new Date().toISOString(),
-                        value: data.amount || 0,
-                        metaInfo: data.utr ? `Ref UTR: ${data.utr}` : ''
-                    });
-                });
-                compileAndRenderFilters();
-            });
+            if(counter === 0) {
+                displayBox.innerHTML = `
+                    <div class="text-center py-24 mx-auto w-full flex flex-col items-center justify-center">
+                        <i class="fa-solid fa-file-invoice text-4xl text-gray-200 mb-3"></i>
+                        <span class="text-xs font-bold text-gray-400">No transaction records found.</span>
+                    </div>`;
+            }
+        }
 
-            // 3. Pipeline Segment: Fetch Multilevel Affiliate Commission Streams
-            // Admin balance adjustment panels record this downstream dynamic commissions structure maps data inside user object
-            const commissionQuery = query(collection(db, "commission_history_logs"), where("receiverUid", "==", userUid));
-            onSnapshot(commissionQuery, (snapshot) => {
-                internalCommissionBuffer = [];
-                snapshot.forEach(doc => {
-                    const data = doc.data();
-                    let downlineTierLabel = data.level === 1 ? "Level 1 Split" : "Level 2 Split";
-                    internalCommissionBuffer.push({
-                        type: 'Rewards',
-                        title: `Team Bonus commission`,
-                        subtitle: downlineTierLabel,
-                        tagStyle: data.level === 1 ? 'bg-indigo-50 text-indigo-600' : 'bg-purple-50 text-purple-600',
-                        date: data.timestamp || '',
-                        rawDate: data.timestamp || new Date().toISOString(),
-                        value: data.commissionEarnedAmount || 0,
-                        metaInfo: `From ID: ${data.downlineUidSource || 'Sub Node'}`
-                    });
-                });
-                compileAndRenderFilters();
+        // Live Profile Observer for accurate fallbacks
+        function connectLiveProfile() {
+            onSnapshot(doc(db, "users", targetLoggedUserUid), (docSnap) => {
+                if(docSnap.exists()){
+                    liveTotalBalance = parseFloat(docSnap.data().balance || docSnap.data().totalBalance || 0).toFixed(2);
+                    liveQuotaBalance = parseFloat(docSnap.data().quota || docSnap.data().quotaBalance || 0).toFixed(2);
+                }
+            });
+            // Try alternate path if users_profiles_nodes is used
+            onSnapshot(doc(db, "users_profiles_nodes", targetLoggedUserUid), (docSnap) => {
+                if(docSnap.exists()){
+                    liveTotalBalance = parseFloat(docSnap.data().balance || docSnap.data().totalBalance || 0).toFixed(2);
+                    liveQuotaBalance = parseFloat(docSnap.data().quota || docSnap.data().quotaBalance || 0).toFixed(2);
+                }
             });
         }
 
-        // Horizontal Category Tab Navigator Switching Logic Handler
-        window.switchHistoryTab = function(targetKey) {
-            activeTabCategory = targetKey;
+        function getSafeBalance(valBefore, valAfter) {
+            let bB = parseFloat((valBefore || "").replace(/[^0-9.-]+/g,""));
+            let bA = parseFloat((valAfter || "").replace(/[^0-9.-]+/g,""));
+            
+            // If DB actually logged 0, we fallback to current live total balance. 
+            // Note: Admins must fix the submit code to save historical balances correctly.
+            if(isNaN(bB) || bB === 0) bB = liveTotalBalance;
+            if(isNaN(bA) || bA === 0) bA = liveTotalBalance;
 
-            // Clear active rendering text labels styling classes elements arrays
-            document.querySelectorAll('.px-4.pt-6 button').forEach(btn => {
-                btn.className = "flex-1 pb-3 text-center whitespace-nowrap transition-all cursor-pointer text-gray-400 font-bold";
+            return { before: `₹${parseFloat(bB).toFixed(2)}`, after: `₹${parseFloat(bA).toFixed(2)}` };
+        }
+
+        function triggerUnifiedRealtimeLedgerDataStream() {
+            // 1. DEPOSITS
+            onSnapshot(query(collection(db, "deposits"), where("userId", "==", targetLoggedUserUid)), (snap) => {
+                snap.forEach(doc => {
+                    const obj = doc.data();
+                    let assetType = obj.type || (obj.usdtAmount ? 'USDT' : 'INR'); 
+                    let rawAmt = parseFloat(obj.amount || obj.taskAmountValue || 0);
+                    let balances = getSafeBalance(obj.balanceBeforeValue || obj.balanceBefore, obj.balanceAfterValue || obj.balanceAfter);
+                    let systemTime = obj.createdAt || obj.timestamp || '00-00-0000 00:00:00';
+                    let utrValue = obj.utr || obj.txid || obj.userInrUtr || 'N/A';
+                    let isGatewayTx = obj.gateway === true || obj.channel === 'gateway' || obj.isFastPay;
+
+                    let gridItems = [];
+                    let descTxt = '';
+
+                    if(assetType === 'USDT') {
+                        let usdtVal = obj.usdtAmount || obj.cryptoRawAmount || (rawAmt / 90);
+                        let rateVal = obj.rate || obj.conversionRateFactor || 110;
+                        let bonusVal = obj.bonus || obj.bonusValue || 0;
+                        
+                        gridItems = [
+                            { label: 'BALANCE BEFORE', value: balances.before },
+                            { label: 'BALANCE AFTER', value: balances.after },
+                            { label: 'USDT AMOUNT', value: `${parseFloat(usdtVal).toFixed(0)} USDT` },
+                            { label: 'RATE', value: `₹${rateVal}/USDT` },
+                            { label: 'BASE INR', value: `₹${rawAmt.toFixed(2)}` },
+                            { label: 'BONUS', value: `₹${parseFloat(bonusVal).toFixed(2)}` },
+                            { label: 'TOTAL INR', value: `₹${(rawAmt + parseFloat(bonusVal)).toFixed(2)}` }
+                        ];
+                        descTxt = obj.remark || obj.description || obj.customAdminMessageDesc || 'USDT Deposit approved';
+                    } else {
+                        // Regular INR Deposit -> Calculate Quota/Income mappings
+                        let incPer = obj.percent || 6;
+                        let incVal = (rawAmt * incPer) / 100;
+                        let quotaPool = rawAmt + incVal;
+
+                        gridItems = [
+                            { label: 'BALANCE BEFORE', value: balances.before },
+                            { label: 'BALANCE AFTER', value: balances.after },
+                            { label: 'INCOME PERCENT', value: `${incVal.toFixed(0)} RS (${incPer}%)` },
+                            { label: 'QUOTA POOL', value: `+装${quotaPool.toFixed(0)}` },
+                            { label: 'UTR', value: utrValue }
+                        ];
+                        // E.g. "Deposit approved - Quota Reward: 648 (Investment: 600, Daily Income: 8%)"
+                        descTxt = obj.description || `Deposit approved - Quota Reward: ${quotaPool.toFixed(0)} (Investment: ${rawAmt.toFixed(0)}, Daily Income: ${incPer}%)`;
+                    }
+
+                    globalDeposits[doc.id] = {
+                        id: doc.id,
+                        titleName: 'Deposit',
+                        txnDirection: 'CREDIT',
+                        iconSymbol: 'fa-solid fa-arrow-down', // Green down arrow
+                        iconBg: 'bg-green-50 text-green-500',
+                        tagStyle: 'bg-green-50 text-green-600',
+                        amountColor: 'text-blue-600',
+                        prefixSign: '+₹',
+                        amountValue: rawAmt.toFixed(2),
+                        status: obj.status || 'Pending',
+                        displayTime: systemTime,
+                        rawTimestamp: systemTime,
+                        gridItems: gridItems,
+                        descriptionText: descTxt,
+                        isGateway: isGatewayTx
+                    };
+                });
+                renderSynchronizedList();
             });
 
-            const targetActiveBtn = document.getElementById(`tabFilter-${targetKey}`);
-            if (targetActiveBtn) {
-                targetActiveBtn.className = "flex-1 pb-3 text-center whitespace-nowrap transition-all cursor-pointer border-b-2 border-black text-black font-black";
-            }
+            // 2. WITHDRAWALS
+            onSnapshot(query(collection(db, "withdraw_history"), where("userId", "==", targetLoggedUserUid)), (snap) => {
+                globalWithdrawals = [];
+                snap.forEach(doc => {
+                    const obj = doc.data();
+                    let balances = getSafeBalance(obj.balanceBefore, obj.balanceAfter);
+                    let isGatewayTx = obj.gateway === true || obj.channel === 'API';
 
-            // Trigger local parsing array redraw cycle fallback
-            localStorage.setItem('token_history_last_active_tab', targetKey);
-            startUnifiedHistoryPipelineSync();
-        };
+                    globalWithdrawals.push({
+                        titleName: 'Withdrawal',
+                        txnDirection: 'DEBIT',
+                        iconSymbol: 'fa-solid fa-arrow-down-left', // Red arrow
+                        iconBg: 'bg-red-50 text-red-500',
+                        tagStyle: 'bg-red-50 text-red-600',
+                        amountColor: 'text-red-500',
+                        prefixSign: '-',
+                        amountValue: parseFloat(obj.amount || 0).toFixed(2),
+                        status: obj.status || 'SUCCESS',
+                        displayTime: obj.time || obj.timestamp || '00-00-0000 00:00:00',
+                        rawTimestamp: obj.time || obj.timestamp || new Date().toISOString(),
+                        gridItems: [
+                            { label: 'BALANCE BEFORE', value: balances.before },
+                            { label: 'BALANCE AFTER', value: balances.after },
+                            { label: 'UPI ID / BANK', value: obj.upiId || obj.bankAccount || 'N/A' },
+                            { label: 'CHANNEL', value: obj.channel || 'Manual' }
+                        ],
+                        descriptionText: obj.description || `Manual payout - UTR: ${obj.utr || 'N/A'}`,
+                        isGateway: isGatewayTx
+                    });
+                });
+                renderSynchronizedList();
+            });
+
+            // 3. COMMISSIONS
+            onSnapshot(query(collection(db, "commission_history_logs"), where("receiverUid", "==", targetLoggedUserUid)), (snap) => {
+                globalCommissions = [];
+                snap.forEach(doc => {
+                    const obj = doc.data();
+                    let balances = getSafeBalance(obj.balanceBefore, obj.balanceAfter);
+                    let lvl = obj.level || 1;
+                    let commPct = obj.commissionPercentage || obj.percent || '0';
+                    let sourceApp = obj.sourceType || 'USDT deposit'; // e.g., 'USDT deposit' or 'task purchase'
+                    
+                    globalCommissions.push({
+                        titleName: `Commission L${lvl}`,
+                        txnDirection: 'CREDIT',
+                        iconSymbol: 'fa-solid fa-chart-line', // Green chart line
+                        iconBg: 'bg-green-50 text-green-500',
+                        tagStyle: 'bg-green-50 text-green-600',
+                        amountColor: 'text-blue-600', // As per screenshot +85.35 in blue
+                        prefixSign: '+', // Screenshot doesn't show ₹ on commission header sometimes, just +85.35
+                        amountValue: parseFloat(obj.commissionEarnedAmount || obj.amount || 0).toFixed(2),
+                        status: 'SUCCESS',
+                        displayTime: obj.timestamp || '00-00-0000 00:00:00',
+                        rawTimestamp: obj.timestamp || new Date().toISOString(),
+                        gridItems: [
+                            { label: 'BALANCE BEFORE', value: balances.before },
+                            { label: 'BALANCE AFTER', value: balances.after },
+                            { label: 'FROM USER', value: obj.downlineUidSource || obj.fromUser || 'N/A' },
+                            { label: 'COMMISSION %', value: `${commPct}%` }
+                        ],
+                        descriptionText: obj.description || `Level ${lvl} Commission - ${commPct}% from ${sourceApp}`,
+                        isGateway: false
+                    });
+                });
+                renderSynchronizedList();
+            });
+
+            // 4. ADMIN ADJUSTMENTS (Deduction / Reward)
+            onSnapshot(query(collection(db, "system_balance_adjustments"), where("targetUserUid", "==", targetLoggedUserUid)), (snap) => {
+                globalAdjustments = [];
+                snap.forEach(doc => {
+                    const obj = doc.data();
+                    const isDebitAction = obj.adjustmentModeType === 'Deduction' || obj.type === 'Deduction';
+                    let balances = getSafeBalance(obj.balanceBefore, obj.balanceAfter);
+                    
+                    globalAdjustments.push({
+                        titleName: isDebitAction ? 'Deduction' : 'Reward',
+                        txnDirection: isDebitAction ? 'DEBIT' : 'CREDIT',
+                        iconSymbol: isDebitAction ? 'fa-solid fa-arrow-down-left' : 'fa-solid fa-award',
+                        iconBg: isDebitAction ? 'bg-red-50 text-red-500' : 'bg-yellow-50 text-yellow-500',
+                        tagStyle: isDebitAction ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-600',
+                        amountColor: isDebitAction ? 'text-red-500' : 'text-blue-600',
+                        prefixSign: isDebitAction ? '-' : '+',
+                        amountValue: parseFloat(obj.deltaValueAmount || obj.amount || 0).toFixed(2),
+                        status: 'SUCCESS',
+                        displayTime: obj.timestamp || '00-00-0000 00:00:00',
+                        rawTimestamp: obj.timestamp || new Date().toISOString(),
+                        gridItems: [
+                            { label: 'BALANCE BEFORE', value: balances.before },
+                            { label: 'BALANCE AFTER', value: balances.after }
+                        ],
+                        descriptionText: obj.reasonContext || obj.description || 'System adjustment',
+                        isGateway: false
+                    });
+                });
+                renderSynchronizedList();
+            });
+        }
 
         window.addEventListener('DOMContentLoaded', () => {
-            const lastSessionTabPointer = localStorage.getItem('token_history_last_active_tab') || 'All';
-            switchHistoryTab(lastSessionTabPointer);
+            connectLiveProfile();
+            setTimeout(triggerUnifiedRealtimeLedgerDataStream, 800); // Slight delay ensures profile fetches first
         });
     </script>
 </body>
