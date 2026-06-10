@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nexapay - Team Dashboard</title>
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <title>NexaPay - Team Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body { font-family: 'Segoe UI', Roboto, sans-serif; }
@@ -63,7 +63,7 @@
             <div class="px-4 mt-5">
                 <h3 class="text-xs font-black text-gray-400 uppercase tracking-wider mb-2">Invite Code</h3>
                 <div class="bg-white border border-gray-100 rounded-xl p-3.5 flex justify-between items-center shadow-3xs">
-                    <p id="txtInviteCodeUrl" class="text-xs font-mono font-bold text-[#1E56B2] truncate pr-3">000000</p>
+                    <p id="txtInviteCodeUrl" class="text-xs font-mono font-bold text-[#1E56B2] truncate pr-3">Loading Link...</p>
                     <button onclick="copyInviteUrlLink()" class="bg-blue-50 text-[#1E56B2] hover:bg-blue-100 p-2.5 rounded-xl text-xs transition-all shrink-0 cursor-pointer">
                         <i class="fa-regular fa-copy"></i>
                     </button>
@@ -108,8 +108,7 @@
             projectId: "nexapay-342d0",
             storageBucket: "nexapay-342d0.firebasestorage.app",
             messagingSenderId: "305096071099",
-            appId: "1:305096071099:web:3db1e75a2669adbcae569e",
-            measurementId: "G-9S068TQ2CS"
+            appId: "1:305096071099:web:3db1e75a2669adbcae569e"
         };
 
         const app = initializeApp(firebaseConfig);
@@ -118,32 +117,28 @@
         window.sessionUserIdentityId = localStorage.getItem('sessionUserIdentityId') || '20014035';
         let currentActiveTimeScopeFilter = 'This Week';
 
-        let commRateA = 10; // Default fallback admin distribution percentage rates
-        let commRateB = 5;
+        let commRateA = 10; 
+        let commRateB = 5;  
 
-        // Fetch dynamic Admin distribution setups live from remote central control node
-        async function fetchCommissionConfigurationParameters() {
-            try {
-                const globalConfigSnap = await getDocs(query(collection(db, "system_settings"), where("__name__", "==", "global_config")));
-                globalConfigSnap.forEach(docNode => {
-                    const settingData = docNode.data();
-                    if(settingData.teamCommissionRateA) commRateA = parseFloat(settingData.teamCommissionRateA);
-                    if(settingData.teamCommissionRateB) commRateB = parseFloat(settingData.teamCommissionRateB);
-                });
-            } catch (err) {
-                console.error("Error configuration parameter sets sync drops: ", err);
-            }
+        function listenCommissionConfigurationParameters() {
+            onSnapshot(doc(db, "system_settings", "master_config"), (docSnap) => {
+                if (docSnap.exists()) {
+                    const settingData = docSnap.data();
+                    if(settingData.level1Comm) commRateA = parseFloat(settingData.level1Comm);
+                    if(settingData.level2Comm) commRateB = parseFloat(settingData.level2Comm);
+                    buildRealtimeDownlinesNetworkTreeMatrix(); 
+                }
+            });
         }
 
-        // Automated Precise Client Range Matrix Selector Loops
         function checkTimestampInsideTimeframeScope(dateString, targetScope) {
-            const rowDate = new Date(dateString);
+            if (!dateString) return false;
+            const rowDate = new Date(dateString.includes('/') ? dateString.replace(/,/g, '') : dateString);
             if (isNaN(rowDate)) return false;
 
             const targetCurrentTime = new Date();
             const currentDayOfWeek = targetCurrentTime.getDay(); 
             
-            // This week Monday checkpoint setup mapping configurations
             const currentWeekMonday = new Date(targetCurrentTime);
             currentWeekMonday.setDate(targetCurrentTime.getDate() - (currentDayOfWeek === 0 ? 6 : currentDayOfWeek - 1));
             currentWeekMonday.setHours(0,0,0,0);
@@ -177,31 +172,27 @@
         window.copyInviteUrlLink = function() {
             const inviteCodeVal = document.getElementById('txtInviteCodeUrl').innerText;
             navigator.clipboard.writeText(inviteCodeVal);
-            alert("Invite ID code copied successfully: " + inviteCodeVal);
+            alert("Registration Referral Link copied successfully!");
         };
 
         window.buildRealtimeDownlinesNetworkTreeMatrix = function() {
-            document.getElementById('txtInviteCodeUrl').innerText = window.sessionUserIdentityId;
+            // 🚨 UPDATED LINK: app-nexapay online structure injected safely 🚨
+            document.getElementById('txtInviteCodeUrl').innerText = `https://app-nexapay.online/regist?code=${window.sessionUserIdentityId}`;
 
-            // Live Realtime Downlines listener mapping stream engine loop
             onSnapshot(collection(db, "users"), async (usersSnapshot) => {
                 let allPlatformUsers = [];
                 usersSnapshot.forEach(docNode => {
                     allPlatformUsers.push({ docId: docNode.id, ...docNode.data() });
                 });
 
-                // Fetch current user database specific code
                 const activeUserNode = allPlatformUsers.find(u => u.userId === window.sessionUserIdentityId);
                 if (!activeUserNode) {
                     resetDashboardToZeroState();
                     return;
                 }
 
-                // Node Level Calculations Structure mapping refer loops
-                // Team A = direct refer nodes matching current logged identity code
                 let teamANodes = allPlatformUsers.filter(u => u.referredBy === window.sessionUserIdentityId);
                 
-                // Team B = users referred explicitly by active nodes inside team A array lists
                 let teamBNodes = [];
                 teamANodes.forEach(aNode => {
                     let subsetB = allPlatformUsers.filter(u => u.referredBy === aNode.userId);
@@ -216,8 +207,7 @@
                     return;
                 }
 
-                // Pull Live Orders Queue to calculate dynamic revenue distributions
-                onSnapshot(collection(db, "recharge_orders"), (ordersSnapshot) => {
+                onSnapshot(collection(db, "deposits"), (ordersSnapshot) => {
                     let approvedOrdersLogs = [];
                     ordersSnapshot.forEach(orderDoc => {
                         const orderData = orderDoc.data();
@@ -234,21 +224,18 @@
                     const container = document.getElementById('boxTeamUsersListContainer');
                     container.innerHTML = '';
 
-                    // Step 1: Render and Process Team A List Elements
+                    // Team A Elements Processing
                     teamANodes.forEach(userA => {
-                        const userOrdersList = approvedOrdersLogs.filter(o => o.ownerUserId === userA.userId);
+                        const userOrdersList = approvedOrdersLogs.filter(o => o.userId === userA.userId);
                         
                         let individualTotalRechargeLife = 0;
-                        let individualFilteredScopeRecharge = 0;
 
                         userOrdersList.forEach(order => {
-                            const orderAmt = parseFloat(order.amount || 0);
+                            const orderAmt = parseFloat(order.baseInr || order.amount || 0);
                             individualTotalRechargeLife += orderAmt;
                             accumulatedTotalTeamRechargeValue += orderAmt;
 
-                            // Time filtration gate
-                            if (checkTimestampInsideTimeframeScope(order.timestamp || order.creationTimestamp, currentActiveTimeScopeFilter)) {
-                                individualFilteredScopeRecharge += orderAmt;
+                            if (checkTimestampInsideTimeframeScope(order.createdAt || order.timestamp, currentActiveTimeScopeFilter)) {
                                 weeklyQuotaTotalA += orderAmt;
                                 weeklyQuotaTotalAB += orderAmt;
                             }
@@ -257,7 +244,6 @@
                         const computedIndividualCommissionA = (individualTotalRechargeLife * (commRateA / 100));
                         accumulatedTotalCommissionValue += computedIndividualCommissionA;
 
-                        // Find Sub-downlines count parameter matching structural sub-node requirements
                         const subDownlinesCountValue = allPlatformUsers.filter(u => u.referredBy === userA.userId).length;
 
                         const rowNode = document.createElement('div');
@@ -281,18 +267,18 @@
                         container.appendChild(rowNode);
                     });
 
-                    // Step 2: Process Team B Nodes metrics values summaries
+                    // Team B Elements Processing
                     teamBNodes.forEach(userB => {
-                        const userOrdersListB = approvedOrdersLogs.filter(o => o.ownerUserId === userB.userId);
+                        const userOrdersListB = approvedOrdersLogs.filter(o => o.userId === userB.userId);
                         
                         let individualTotalRechargeLifeB = 0;
 
                         userOrdersListB.forEach(order => {
-                            const orderAmt = parseFloat(order.amount || 0);
+                            const orderAmt = parseFloat(order.baseInr || order.amount || 0);
                             individualTotalRechargeLifeB += orderAmt;
                             accumulatedTotalTeamRechargeValue += orderAmt;
 
-                            if (checkTimestampInsideTimeframeScope(order.timestamp || order.creationTimestamp, currentActiveTimeScopeFilter)) {
+                            if (checkTimestampInsideTimeframeScope(order.createdAt || order.timestamp, currentActiveTimeScopeFilter)) {
                                 weeklyQuotaTotalAB += orderAmt;
                             }
                         });
@@ -323,7 +309,6 @@
                         container.appendChild(rowNodeB);
                     });
 
-                    // Sync parameters elements output strings variables to screen tags elements panels
                     document.getElementById('lblDisplayCommission').innerText = accumulatedTotalCommissionValue.toFixed(2);
                     document.getElementById('lblDisplayTeamRecharge').innerText = accumulatedTotalTeamRechargeValue.toFixed(0);
                     document.getElementById('lblDisplayQuotaA').innerText = weeklyQuotaTotalA.toFixed(1);
@@ -339,13 +324,12 @@
             document.getElementById('lblDisplayQuotaAB').innerText = '0.0';
             document.getElementById('boxTeamUsersListContainer').innerHTML = `
                 <div class="text-center py-8 text-gray-400 text-xs font-medium italic bg-gray-50 border border-dashed border-gray-200 rounded-2xl">
-                    No active referral downline nodes register bounds found under this account hierarchy stack link.
+                    No active referral downline nodes bounds found under this account hierarchy stack link.
                 </div>`;
         }
 
-        window.addEventListener('DOMContentLoaded', async () => {
-            await fetchCommissionConfigurationParameters();
-            window.buildRealtimeDownlinesNetworkTreeMatrix();
+        window.addEventListener('DOMContentLoaded', () => {
+            listenCommissionConfigurationParameters();
         });
     </script>
 </body>
