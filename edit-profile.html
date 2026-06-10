@@ -3,163 +3,391 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script type="module" src="js/auth-guard.js"></script>
-    <title>Account Info</title>
+    <title>Nexapay - Account Info</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Roboto, sans-serif; }
-        body { background: #f8f9fa; display: flex; justify-content: center; min-height: 100vh; }
-        .app-container { width: 100%; max-width: 420px; background: white; min-height: 100vh; position: relative; }
-
-        /* HEADER */
-        .header { display: flex; align-items: center; padding: 15px; border-bottom: 1px solid #eee; background: #fff; }
-        .back-btn { font-size: 24px; cursor: pointer; width: 40px; text-decoration: none; color: #000; }
-        .header-title { flex: 1; text-align: center; font-weight: bold; margin-right: 40px; }
-
-        /* PROFILE SECTION */
-        .avatar-section { text-align: center; padding: 40px 0; }
-        .avatar-circle { width: 100px; height: 100px; background: #f0f0f0; border-radius: 50%; margin: 0 auto; display: flex; align-items: center; justify-content: center; }
-        .avatar-circle img { width: 60%; opacity: 0.5; }
-
-        /* INFO LIST */
-        .info-list { padding: 0 15px; }
-        .info-card { background: #fff; border: 1px solid #f3f3f3; padding: 18px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; cursor: pointer; }
-        .label { color: #333; font-weight: 500; }
-        .value { color: #666; display: flex; align-items: center; gap: 10px; }
-        .arrow { color: #ccc; }
-
-        /* FULL SCREEN OVERLAYS (Password & PIN) */
-        .overlay-page { position: fixed; top: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 420px; height: 100%; background: #fff; z-index: 1000; display: none; flex-direction: column; }
+        body { font-family: 'Segoe UI', Roboto, sans-serif; background-color: #FAFAFA; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         
-        /* PHOTO 1 STYLE (Password) */
-        .input-group { padding: 20px; margin-top: 20px; }
-        .input-field { width: 100%; padding: 16px; background: #fafafa; border: 1px solid #eee; border-radius: 12px; margin-bottom: 15px; outline: none; font-size: 16px; color: #ccc; }
-        .black-btn { width: calc(100% - 40px); background: #000; color: #fff; border: none; padding: 18px; border-radius: 12px; font-weight: bold; font-size: 16px; margin: 20px; cursor: pointer; position: absolute; bottom: 30px; }
+        /* Smooth View Transitions */
+        .animate-fade-in { animation: fadeIn 0.2s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
 
-        /* PHOTO 2 STYLE (PIN) */
-        .pin-container { padding: 25px; }
-        .pin-label { font-weight: bold; margin-bottom: 12px; display: block; font-size: 15px; }
-        .pin-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin-bottom: 30px; }
-        .pin-box { width: 100%; aspect-ratio: 1; background: #f5f5f5; border: 1px solid #eee; border-radius: 5px; text-align: center; font-size: 20px; outline: none; }
-        .grey-btn { width: calc(100% - 40px); background: #8e8e8e; color: #fff; border: none; padding: 18px; border-radius: 12px; font-weight: bold; font-size: 16px; margin: 20px; cursor: pointer; position: absolute; bottom: 30px; }
+        /* PIN Input Boxes Style */
+        .pin-box {
+            width: 48px; height: 50px; text-align: center; font-size: 22px; font-weight: 600;
+            background-color: #F9FAFB; border: 1px solid transparent; border-radius: 8px;
+            outline: none; transition: all 0.2s; color: #000;
+        }
+        .pin-box:focus { border-color: #D1D5DB; background-color: #FFFFFF; box-shadow: 0 0 0 2px rgba(0,0,0,0.05); }
+
+        /* Input fields for Password */
+        .pass-input {
+            width: 100%; padding: 16px; border-radius: 12px;
+            border: 1px solid #F3F4F6; background-color: #FFFFFF;
+            font-weight: 500; color: #111827; outline: none;
+            transition: all 0.2s; box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+        }
+        .pass-input:focus { border-color: #E5E7EB; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
     </style>
 </head>
-<body>
+<body class="flex justify-center items-center min-h-screen bg-gray-100">
 
-<div class="app-container">
-    <!-- MAIN EDIT PROFILE SCREEN -->
-    <div class="header">
-        <a href="me.html" class="back-btn">❮</a>
-        <div class="header-title">Account Info</div>
-    </div>
-
-    <div class="avatar-section">
-        <div class="avatar-circle">
-            <img src="https://cdn-icons-png.flaticon.com/512/1077/1077114.png">
-        </div>
-    </div>
-
-    <div class="info-list">
-        <div class="info-card">
-            <span class="label">ID</span>
-            <span class="value" id="user-id">Loading...</span>
-        </div>
-        <div class="info-card">
-            <span class="label">Phone</span>
-            <span class="value" id="user-phone">Loading...</span>
-        </div>
-        <div class="info-card" onclick="openOverlay('pass')">
-            <span class="label">Password</span>
-            <span class="value">****** <span class="arrow">❯</span></span>
-        </div>
-        <div class="info-card" onclick="openOverlay('pin')">
-            <span class="label">PIN</span>
-            <span class="value"><span class="arrow">❯</span></span>
-        </div>
-    </div>
-
-    <!-- OVERLAY: CHANGE PASSWORD (Photo 1 Match) -->
-    <div id="overlay-pass" class="overlay-page">
-        <div class="header">
-            <span class="back-btn" onclick="closeOverlay('pass')">❮</span>
-            <div class="header-title">Change Password</div>
-        </div>
-        <div class="input-group">
-            <input type="password" class="input-field" placeholder="Old Password">
-            <input type="password" class="input-field" placeholder="New Password">
-            <input type="password" class="input-field" placeholder="Confirm">
-        </div>
-        <button class="black-btn" onclick="updatePass()">Submit</button>
-    </div>
-
-    <!-- OVERLAY: CHANGE PIN (Photo 2 Match) -->
-    <div id="overlay-pin" class="overlay-page">
-        <div class="header">
-            <span class="back-btn" onclick="closeOverlay('pin')">❮</span>
-            <div class="header-title">PIN</div>
-        </div>
-        <div class="pin-container">
-            <span class="pin-label">Old PIN</span>
-            <div class="pin-grid">
-                <input type="password" maxlength="1" class="pin-box" onkeyup="moveFocus(this)">
-                <input type="password" maxlength="1" class="pin-box" onkeyup="moveFocus(this)">
-                <input type="password" maxlength="1" class="pin-box" onkeyup="moveFocus(this)">
-                <input type="password" maxlength="1" class="pin-box" onkeyup="moveFocus(this)">
-                <input type="password" maxlength="1" class="pin-box" onkeyup="moveFocus(this)">
-                <input type="password" maxlength="1" class="pin-box" onkeyup="moveFocus(this)">
+    <div class="bg-gray-50 w-full max-w-md min-h-screen md:min-h-[850px] flex flex-col md:shadow-xl md:rounded-3xl overflow-hidden relative">
+        
+        <div id="viewAccountInfo" class="flex flex-col h-full w-full bg-gray-50 animate-fade-in">
+            <div class="px-4 pt-6 pb-2 bg-gray-50 sticky top-0 z-50 flex items-center justify-between">
+                <button onclick="window.location.href='me.html'" class="text-gray-800 text-xl w-10 text-left cursor-pointer">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </button>
+                <h1 class="text-[17px] font-bold text-gray-900 tracking-tight flex-1 text-center">Account Info</h1>
+                <div class="w-10"></div>
             </div>
-            <span class="pin-label">New PIN</span>
-            <div class="pin-grid">
-                <input type="password" maxlength="1" class="pin-box" onkeyup="moveFocus(this)">
-                <input type="password" maxlength="1" class="pin-box" onkeyup="moveFocus(this)">
-                <input type="password" maxlength="1" class="pin-box" onkeyup="moveFocus(this)">
-                <input type="password" maxlength="1" class="pin-box" onkeyup="moveFocus(this)">
-                <input type="password" maxlength="1" class="pin-box" onkeyup="moveFocus(this)">
-                <input type="password" maxlength="1" class="pin-box" onkeyup="moveFocus(this)">
-            </div>
-            <span class="pin-label">Confirm</span>
-            <div class="pin-grid">
-                <input type="password" maxlength="1" class="pin-box" onkeyup="moveFocus(this)">
-                <input type="password" maxlength="1" class="pin-box" onkeyup="moveFocus(this)">
-                <input type="password" maxlength="1" class="pin-box" onkeyup="moveFocus(this)">
-                <input type="password" maxlength="1" class="pin-box" onkeyup="moveFocus(this)">
-                <input type="password" maxlength="1" class="pin-box" onkeyup="moveFocus(this)">
-                <input type="password" maxlength="1" class="pin-box" onkeyup="moveFocus(this)">
+
+            <div class="flex-1 overflow-y-auto px-5 py-6">
+                <div class="flex justify-center mb-10">
+                    <div class="w-[120px] h-[120px] bg-[#5C5C5C] rounded-full flex items-center justify-center text-gray-300 shadow-sm relative overflow-hidden">
+                        <div class="absolute top-4 w-12 h-12 bg-gray-300 rounded-full"></div>
+                        <div class="absolute bottom-[-10px] w-24 h-16 bg-gray-300 rounded-t-full"></div>
+                    </div>
+                </div>
+
+                <div class="space-y-3">
+                    <div class="bg-white rounded-xl border border-gray-100 p-4 flex justify-between items-center shadow-sm">
+                        <span class="font-bold text-gray-900 text-[15px]">ID</span>
+                        <span id="displayUserId" class="text-gray-500 font-medium text-[15px]">Loading...</span>
+                    </div>
+
+                    <div class="bg-white rounded-xl border border-gray-100 p-4 flex justify-between items-center shadow-sm">
+                        <span class="font-bold text-gray-900 text-[15px]">Phone</span>
+                        <span id="displayUserPhone" class="text-gray-500 font-medium text-[15px]">Loading...</span>
+                    </div>
+
+                    <div onclick="switchView('viewChangePassword')" class="bg-white rounded-xl border border-gray-100 p-4 flex justify-between items-center shadow-sm cursor-pointer hover:bg-gray-50 transition-colors">
+                        <span class="font-bold text-gray-900 text-[15px]">Password</span>
+                        <div class="flex items-center space-x-2 text-gray-400">
+                            <span class="tracking-widest mt-1 text-lg">******</span>
+                            <i class="fa-solid fa-chevron-right text-[13px]"></i>
+                        </div>
+                    </div>
+
+                    <div onclick="switchView('viewChangePin')" class="bg-white rounded-xl border border-gray-100 p-4 flex justify-between items-center shadow-sm cursor-pointer hover:bg-gray-50 transition-colors">
+                        <span class="font-bold text-gray-900 text-[15px]">PIN</span>
+                        <div class="flex items-center text-gray-400">
+                            <i class="fa-solid fa-chevron-right text-[13px]"></i>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-        <button class="grey-btn" onclick="updatePin()">Submit</button>
+
+
+        <div id="viewChangePassword" class="hidden flex-col h-full w-full bg-white animate-fade-in">
+            <div class="px-4 pt-6 pb-4 bg-white sticky top-0 z-50 flex items-center justify-between border-b border-gray-50">
+                <button onclick="switchView('viewAccountInfo')" class="text-gray-800 text-xl w-10 text-left cursor-pointer">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </button>
+                <h1 class="text-[17px] font-bold text-gray-900 tracking-tight flex-1 text-center">Change Password</h1>
+                <div class="w-10"></div>
+            </div>
+
+            <div class="flex-1 px-5 pt-8 flex flex-col">
+                <div class="space-y-4 flex-1">
+                    <input type="text" id="inpOldPassword" placeholder="Old Password" class="pass-input">
+                    <input type="text" id="inpNewPassword" placeholder="New Password" class="pass-input">
+                    <input type="text" id="inpConfirmPassword" placeholder="Confirm" class="pass-input">
+                    <p id="passErrorMsg" class="text-red-500 text-xs font-bold text-center mt-2 hidden"></p>
+                </div>
+
+                <div class="pb-10">
+                    <button id="btnSubmitPassword" class="w-full bg-black text-white font-semibold text-[16px] py-4 rounded-xl shadow-md hover:bg-gray-800 transition-colors">
+                        Submit
+                    </button>
+                </div>
+            </div>
+        </div>
+
+
+        <div id="viewChangePin" class="hidden flex-col h-full w-full bg-white animate-fade-in">
+            <div class="px-4 pt-6 pb-4 bg-white sticky top-0 z-50 flex items-center justify-between border-b border-gray-50">
+                <button onclick="switchView('viewAccountInfo')" class="text-gray-800 text-xl w-10 text-left cursor-pointer">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </button>
+                <h1 class="text-[17px] font-bold text-gray-900 tracking-tight flex-1 text-center">PIN</h1>
+                <div class="w-10"></div>
+            </div>
+
+            <div class="flex-1 px-5 pt-8 flex flex-col">
+                <div class="flex-1">
+                    
+                    <div class="mb-6 hidden" id="oldPinSection">
+                        <label class="block text-[14px] font-bold text-gray-900 mb-3">Old PIN</label>
+                        <div class="flex justify-between gap-1" id="oldPinContainer">
+                            <input type="text" inputmode="numeric" maxlength="1" class="pin-box old-pin-inp">
+                            <input type="text" inputmode="numeric" maxlength="1" class="pin-box old-pin-inp">
+                            <input type="text" inputmode="numeric" maxlength="1" class="pin-box old-pin-inp">
+                            <input type="text" inputmode="numeric" maxlength="1" class="pin-box old-pin-inp">
+                            <input type="text" inputmode="numeric" maxlength="1" class="pin-box old-pin-inp">
+                            <input type="text" inputmode="numeric" maxlength="1" class="pin-box old-pin-inp">
+                        </div>
+                    </div>
+
+                    <div class="mb-6">
+                        <label class="block text-[14px] font-bold text-gray-900 mb-3" id="setPinLabel">Set PIN</label>
+                        <div class="flex justify-between gap-1" id="setPinContainer">
+                            <input type="text" inputmode="numeric" maxlength="1" class="pin-box set-pin-inp">
+                            <input type="text" inputmode="numeric" maxlength="1" class="pin-box set-pin-inp">
+                            <input type="text" inputmode="numeric" maxlength="1" class="pin-box set-pin-inp">
+                            <input type="text" inputmode="numeric" maxlength="1" class="pin-box set-pin-inp">
+                            <input type="text" inputmode="numeric" maxlength="1" class="pin-box set-pin-inp">
+                            <input type="text" inputmode="numeric" maxlength="1" class="pin-box set-pin-inp">
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="block text-[14px] font-bold text-gray-900 mb-3">Confirm</label>
+                        <div class="flex justify-between gap-1" id="confirmPinContainer">
+                            <input type="text" inputmode="numeric" maxlength="1" class="pin-box confirm-pin-inp">
+                            <input type="text" inputmode="numeric" maxlength="1" class="pin-box confirm-pin-inp">
+                            <input type="text" inputmode="numeric" maxlength="1" class="pin-box confirm-pin-inp">
+                            <input type="text" inputmode="numeric" maxlength="1" class="pin-box confirm-pin-inp">
+                            <input type="text" inputmode="numeric" maxlength="1" class="pin-box confirm-pin-inp">
+                            <input type="text" inputmode="numeric" maxlength="1" class="pin-box confirm-pin-inp">
+                        </div>
+                    </div>
+                    <p id="pinErrorMsg" class="text-red-500 text-xs font-bold text-center mt-2 hidden"></p>
+                </div>
+
+                <div class="pb-10">
+                    <button id="btnSubmitPin" class="w-full bg-[#8E8E93] text-white font-semibold text-[16px] py-4 rounded-xl shadow-sm transition-colors cursor-not-allowed" disabled>
+                        Submit
+                    </button>
+                </div>
+            </div>
+        </div>
+
     </div>
 
-</div>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+        import { getFirestore, doc, getDoc, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
-<script type="module">
-    import { auth, db } from './js/config.js';
-    import { doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        // FIREBASE CONFIGURATION
+        const firebaseConfig = {
+            apiKey: "AIzaSyCHoR7wojkpTZZPR-gcfDnPW8aOTuoiaAU",
+            authDomain: "nexapay-342d0.firebaseapp.com",
+            databaseURL: "https://nexapay-342d0-default-rtdb.firebaseio.com",
+            projectId: "nexapay-342d0",
+            storageBucket: "nexapay-342d0.firebasestorage.app",
+            messagingSenderId: "305096071099",
+            appId: "1:305096071099:web:3db1e75a2669adbcae569e"
+        };
 
-    // Overlay Controls
-    window.openOverlay = (id) => document.getElementById('overlay-' + id).style.display = 'flex';
-    window.closeOverlay = (id) => document.getElementById('overlay-' + id).style.display = 'none';
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
 
-    // PIN Auto Focus
-    window.moveFocus = (el) => {
-        if (el.value.length === 1) {
-            let next = el.nextElementSibling;
-            if (next) next.focus();
-        }
-    };
+        // Session ID System
+        const targetLoggedUserUid = localStorage.getItem('sessionUserIdentityId') || 
+                                    localStorage.getItem('userId') || 
+                                    localStorage.getItem('userUid');
 
-    // Firebase Data
-    auth.onAuthStateChanged((user) => {
-        if (user) {
-            onSnapshot(doc(db, "users", user.uid), (snap) => {
-                const d = snap.data();
-                document.getElementById('user-id').innerText = d.userId || '---';
-                document.getElementById('user-phone').innerText = d.phone || '---';
+        // Global Variables
+        let currentUserData = {};
+        let hasExistingPin = false; // Check for old MPIN
+        
+        // --- STRICT VIEW NAVIGATION SYSTEM ---
+        window.switchView = function(viewId) {
+            // Hide all sections first
+            const allViews = ['viewAccountInfo', 'viewChangePassword', 'viewChangePin'];
+            allViews.forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+                document.getElementById(id).classList.remove('flex');
+            });
+            
+            // Show the targeted section
+            document.getElementById(viewId).classList.remove('hidden');
+            document.getElementById(viewId).classList.add('flex');
+            
+            // Clear inputs and errors when switching
+            if(viewId === 'viewChangePassword') {
+                document.getElementById('inpOldPassword').value = '';
+                document.getElementById('inpNewPassword').value = '';
+                document.getElementById('inpConfirmPassword').value = '';
+                document.getElementById('passErrorMsg').classList.add('hidden');
+            }
+            if(viewId === 'viewChangePin') {
+                document.querySelectorAll('.pin-box').forEach(inp => inp.value = '');
+                document.getElementById('pinErrorMsg').classList.add('hidden');
+                
+                // Show/Hide Old PIN section dynamically based on user data
+                if (hasExistingPin) {
+                    document.getElementById('oldPinSection').classList.remove('hidden');
+                    document.getElementById('setPinLabel').innerText = "New PIN";
+                } else {
+                    document.getElementById('oldPinSection').classList.add('hidden');
+                    document.getElementById('setPinLabel').innerText = "Set PIN";
+                }
+                checkPinCompletion();
+            }
+        };
+
+        // --- Fetch Real-Time Data ---
+        function attachRealtimeProfileListener() {
+            if(!targetLoggedUserUid) {
+                alert("Session Expired. Please Login again.");
+                window.location.href = 'index.html';
+                return;
+            }
+
+            const userRef = doc(db, "users", targetLoggedUserUid); 
+            
+            onSnapshot(userRef, (snap) => {
+                if(snap.exists()) {
+                    currentUserData = snap.data();
+                    
+                    // Display details
+                    document.getElementById('displayUserId').innerText = currentUserData.user_id || currentUserData.uid || targetLoggedUserUid;
+                    document.getElementById('displayUserPhone').innerText = currentUserData.phone || currentUserData.mobile || 'N/A';
+                    
+                    // Check if MPIN exists to trigger Old MPIN UI
+                    if(currentUserData.mpin || currentUserData.pin) {
+                        hasExistingPin = true;
+                    } else {
+                        hasExistingPin = false;
+                    }
+                }
             });
         }
-    });
 
-    window.updatePass = () => { alert("Password updated successfully!"); closeOverlay('pass'); };
-    window.updatePin = () => { alert("PIN updated successfully!"); closeOverlay('pin'); };
-</script>
+        // --- PASSWORD LOGIC ---
+        document.getElementById('btnSubmitPassword').addEventListener('click', async () => {
+            const oldPass = document.getElementById('inpOldPassword').value.trim();
+            const newPass = document.getElementById('inpNewPassword').value.trim();
+            const confPass = document.getElementById('inpConfirmPassword').value.trim();
+            const errorBox = document.getElementById('passErrorMsg');
+
+            if(!oldPass || !newPass || !confPass) {
+                errorBox.innerText = "Please fill all fields.";
+                errorBox.classList.remove('hidden'); return;
+            }
+            if(newPass !== confPass) {
+                errorBox.innerText = "New Password & Confirm Password do not match.";
+                errorBox.classList.remove('hidden'); return;
+            }
+            if(currentUserData.password && currentUserData.password !== oldPass) {
+                errorBox.innerText = "Old Password is incorrect.";
+                errorBox.classList.remove('hidden'); return;
+            }
+
+            try {
+                document.getElementById('btnSubmitPassword').innerText = "Updating...";
+                const userRef = doc(db, "users", targetLoggedUserUid);
+                await updateDoc(userRef, { password: newPass });
+                
+                alert("Password updated successfully!");
+                switchView('viewAccountInfo'); // Wapas Profile page par bheje
+            } catch (err) {
+                errorBox.innerText = "Error updating password. Try again.";
+                errorBox.classList.remove('hidden');
+            } finally {
+                document.getElementById('btnSubmitPassword').innerText = "Submit";
+            }
+        });
+
+        // --- PIN/MPIN LOGIC ---
+        const oldPinInps = document.querySelectorAll('.old-pin-inp');
+        const setPinInps = document.querySelectorAll('.set-pin-inp');
+        const confPinInps = document.querySelectorAll('.confirm-pin-inp');
+        const btnSubmitPin = document.getElementById('btnSubmitPin');
+
+        function setupPinBoxes(inputsNodeList) {
+            inputsNodeList.forEach((inp, idx) => {
+                inp.addEventListener('input', (e) => {
+                    e.target.value = e.target.value.replace(/[^0-9]/g, ''); // Sirf Numbers allow kare
+                    if (e.target.value !== '' && idx < inputsNodeList.length - 1) {
+                        inputsNodeList[idx + 1].focus();
+                    }
+                    checkPinCompletion();
+                });
+                inp.addEventListener('keydown', (e) => {
+                    if (e.key === 'Backspace' && e.target.value === '' && idx > 0) {
+                        inputsNodeList[idx - 1].focus();
+                    }
+                });
+            });
+        }
+
+        setupPinBoxes(oldPinInps);
+        setupPinBoxes(setPinInps);
+        setupPinBoxes(confPinInps);
+
+        function checkPinCompletion() {
+            let oldPinStr = Array.from(oldPinInps).map(i => i.value).join('');
+            let setPinStr = Array.from(setPinInps).map(i => i.value).join('');
+            let confPinStr = Array.from(confPinInps).map(i => i.value).join('');
+            
+            let isComplete = false;
+            if(hasExistingPin) {
+                if(oldPinStr.length === 6 && setPinStr.length === 6 && confPinStr.length === 6) isComplete = true;
+            } else {
+                if(setPinStr.length === 6 && confPinStr.length === 6) isComplete = true;
+            }
+
+            if(isComplete) {
+                btnSubmitPin.disabled = false;
+                btnSubmitPin.classList.remove('bg-[#8E8E93]', 'cursor-not-allowed');
+                btnSubmitPin.classList.add('bg-black', 'cursor-pointer', 'hover:bg-gray-800');
+            } else {
+                btnSubmitPin.disabled = true;
+                btnSubmitPin.classList.add('bg-[#8E8E93]', 'cursor-not-allowed');
+                btnSubmitPin.classList.remove('bg-black', 'cursor-pointer', 'hover:bg-gray-800');
+            }
+        }
+
+        document.getElementById('btnSubmitPin').addEventListener('click', async () => {
+            let oldPinStr = Array.from(oldPinInps).map(i => i.value).join('');
+            let setPinStr = Array.from(setPinInps).map(i => i.value).join('');
+            let confPinStr = Array.from(confPinInps).map(i => i.value).join('');
+            const errorBox = document.getElementById('pinErrorMsg');
+
+            // 1. Check Old PIN First
+            if(hasExistingPin) {
+                const actualOldPin = currentUserData.mpin || currentUserData.pin;
+                if(oldPinStr !== actualOldPin) {
+                    errorBox.innerText = "Old PIN is incorrect!";
+                    errorBox.classList.remove('hidden');
+                    return;
+                }
+            }
+
+            // 2. Check New PIN Math
+            if(setPinStr !== confPinStr) {
+                errorBox.innerText = "New PIN & Confirm PIN do not match!";
+                errorBox.classList.remove('hidden');
+                return;
+            }
+
+            try {
+                btnSubmitPin.innerText = "Updating...";
+                const userRef = doc(db, "users", targetLoggedUserUid);
+                // Saving MPIN to Firebase
+                await updateDoc(userRef, { mpin: setPinStr, pin: setPinStr });
+                
+                alert("PIN updated successfully!");
+                switchView('viewAccountInfo'); // Wapas Profile page par bheje
+            } catch (err) {
+                errorBox.innerText = "Error updating PIN. Try again.";
+                errorBox.classList.remove('hidden');
+            } finally {
+                btnSubmitPin.innerText = "Submit";
+                checkPinCompletion();
+            }
+        });
+
+        // Initialize Call
+        window.addEventListener('DOMContentLoaded', attachRealtimeProfileListener);
+    </script>
 </body>
 </html>
